@@ -5,10 +5,10 @@
 ## subtree で取り込む例
 ```bash
 # 初回追加（例: devcontainer-bootstrap）
-git subtree add --prefix skills/devcontainer-bootstrap https://github.com/your-org/agent-skills.git main --squash
+git subtree add --prefix skills/devcontainer-bootstrap https://github.com/nimiusrd/agent-skills.git main --squash
 
 # 更新を取り込む
-git subtree pull --prefix skills/devcontainer-bootstrap https://github.com/your-org/agent-skills.git main --squash
+git subtree pull --prefix skills/devcontainer-bootstrap https://github.com/nimiusrd/agent-skills.git main --squash
 ```
 
 ## 利用者側の最短導入手順（devcontainer-bootstrap）
