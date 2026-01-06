@@ -1,15 +1,15 @@
 # devcontainer-bootstrap Skill
 
 ## 目的
-どのリポジトリでも一貫した Dev Container 初期設定を導入・更新するためのスキル。スタック自動判定→テンプレ適用（safe/overwrite 切替）→変更内容の説明までをスクリプトで行う。
+どのリポジトリでも一貫した Dev Container 初期設定を導入・更新するためのスキル。スタック自動判定→テンプレ適用（safe/overwrite 切替）→変更内容の説明までをスクリプトで行う。対応スタック: node / python / rust。
 
 ## チャット呼び出し例
 1) **auto + safe**  
    「このリポジトリに Dev Container を safe モードで自動設定して」
 2) **node + pnpm + overwrite**  
    「stack=node, packageManager=pnpm, mode=overwrite, includeTools=true, addCI=true で貼って」
-3) **既存 devcontainer あり + safe**  
-   「既存の .devcontainer を壊さないよう safe で更新して、stack=python で進めて」
+3) **rust + safe**  
+   「stack=rust, mode=safe で貼って（Cargo.toml があるリポジトリ）」
 
 ## ローカルで直接叩く例
 ```bash

@@ -26,4 +26,9 @@ if [[ -f "pyproject.toml" || -f "requirements.txt" ]]; then
   fi
 fi
 
+if [[ -f "Cargo.toml" ]]; then
+  echo "[postCreate] rust detected (Cargo.toml)"
+  cargo fetch || true
+fi
+
 echo "[postCreate] done"

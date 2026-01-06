@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Detect repository stack: node | python | unknown
+# Detect repository stack: node | python | rust | unknown
 # Rules:
 # - node    : package.json
 # - python  : pyproject.toml OR requirements.txt
+# - rust    : Cargo.toml
 # - multiple hits => unknown (force explicit stack selection)
 
 ROOT="${1:-.}"
@@ -21,8 +22,8 @@ hits=()
 find_hit "package.json" && hits+=("node")
 find_hit "pyproject.toml" && hits+=("python")
 find_hit "requirements.txt" && hits+=("python")
+find_hit "Cargo.toml" && hits+=("rust")
 
-# de-duplicate python hits if both files exist
 if [ "${#hits[@]}" -gt 1 ]; then
   # normalize by unique values
   uniq_hits=()

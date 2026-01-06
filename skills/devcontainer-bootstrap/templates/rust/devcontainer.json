@@ -1,0 +1,25 @@
+{
+  "name": "Rust DevContainer",
+  "image": "mcr.microsoft.com/devcontainers/rust:1",
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll": "explicit",
+          "source.organizeImports": "explicit"
+        },
+        "files.eol": "\\n",
+        "[rust]": {
+          "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        }
+      }
+    }
+  },
+  "features": {},
+  "postCreateCommand": ".devcontainer/postCreate.sh"
+}

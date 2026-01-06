@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Apply Dev Container template with safe/overwrite modes.
 # Options:
-#   --stack <auto|node|python>         (default: auto)
+#   --stack <auto|node|python|rust>    (default: auto)
 #   --package-manager <npm|pnpm|yarn>  (node only, default: npm)
 #   --mode <safe|overwrite>            (default: safe)
 #   --include-tools <true|false>       (default: false)
@@ -30,7 +30,7 @@ ADD_CI="false"
 usage() {
   cat <<'EOF'
 Usage: apply_devcontainer.sh [options]
-  --stack <auto|node|python|go>      Default: auto
+  --stack <auto|node|python|rust>    Default: auto
   --package-manager <npm|pnpm|yarn>  Node only (default: npm)
   --mode <safe|overwrite>            Default: safe
   --include-tools <true|false>       Default: false
@@ -69,8 +69,8 @@ case "$MODE" in
 esac
 
 case "$STACK" in
-  auto|node|python) ;;
-  *) fail "stack must be auto|node|python (got: $STACK)" ;;
+  auto|node|python|rust) ;;
+  *) fail "stack must be auto|node|python|rust (got: $STACK)" ;;
 esac
 
 case "$PKG_MANAGER" in
@@ -83,7 +83,7 @@ if [[ "$STACK" == "auto" ]]; then
   DETECTED="$("${SCRIPT_DIR}/detect_stack.sh" "$ROOT_DIR")"
   log "auto-detected stack: ${DETECTED}"
   if [[ "$DETECTED" == "unknown" ]]; then
-    fail "スタックを判定できませんでした。--stack で node|python を明示してください。"
+    fail "スタックを判定できませんでした。--stack で node|python|rust を明示してください。"
   fi
   STACK="$DETECTED"
 fi

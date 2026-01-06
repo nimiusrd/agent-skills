@@ -1,5 +1,5 @@
 name: devcontainer-bootstrap
-description: Dev Container を最短で導入/更新するためのブートストラップ。stack を自動判定（node/python）し、テンプレート適用または安全更新を行う。既存 .devcontainer がある場合はバックアップ後にマージ。Chat オプション: stack (auto|node|python), packageManager (npm|pnpm|yarn), mode (safe|overwrite), includeTools (true|false), addCI (true|false)。
+description: Dev Container を最短で導入/更新するためのブートストラップ。stack を自動判定（node/python/rust）し、テンプレート適用または安全更新を行う。既存 .devcontainer がある場合はバックアップ後にマージ。Chat オプション: stack (auto|node|python|rust), packageManager (npm|pnpm|yarn), mode (safe|overwrite), includeTools (true|false), addCI (true|false)。
 ---
 
 # devcontainer-bootstrap
@@ -7,16 +7,16 @@ description: Dev Container を最短で導入/更新するためのブートス�
 ## 使いどころ
 - 任意リポジトリに Dev Container を素早く導入したいとき
 - 既存 `.devcontainer/` を壊さず拡張したいとき（バックアップ必須）
-- Node/Python の代表的セットアップをテンプレで貼りたいとき
+- Node/Python/Rust の代表的セットアップをテンプレで貼りたいとき
 
 ## ワークフロー（(1) scan → (2) detect → (3) apply/update → (4) explain）
 1) **scan**: リポジトリルートを確認し、スタック候補ファイルをチェック  
-2) **detect**: `scripts/detect_stack.sh` で `node|python|unknown` を判定（複数命中や go.mod のみは unknown → stack を明示指定）  
+2) **detect**: `scripts/detect_stack.sh` で `node|python|rust|unknown` を判定（複数命中や go.mod のみは unknown → stack を明示指定）  
 3) **apply/update**: `scripts/apply_devcontainer.sh` を実行し `.devcontainer/` を生成/更新  
 4) **explain**: 実行ログを読み、何がバックアップ/更新されたかをユーザーに伝える。競合や手動フォローが必要なら明示
 
 ## 実行オプション（チャットで指定可能）
-- `stack`: `auto|node|python`（default auto, 複数命中や go.mod のみは unknown → stack 指定を促す）
+- `stack`: `auto|node|python|rust`（default auto, 複数命中や go.mod のみは unknown → stack 指定を促す）
 - `packageManager`: `npm|pnpm|yarn`（node のみ、postCreate で install 実行）
 - `mode`: `safe|overwrite`  
   - safe: 既存 `devcontainer.json` をマージ（extensions/settings/features/postCreateCommand）。`jq` 無しでも最小追記（postCreate 実行を確実に追加）。既存 Dockerfile は保持。  
@@ -60,5 +60,5 @@ bash skills/devcontainer-bootstrap/scripts/apply_devcontainer.sh --stack node --
 ## バンドル済みリソース
 - `scripts/detect_stack.sh`: スタック判定（node/python/go/unknown）
 - `scripts/apply_devcontainer.sh`: テンプレ適用 & 安全更新 & CI 生成
-- `templates/`: stack 別 `devcontainer.json` / `Dockerfile`（node/python） + 共通 `postCreate.sh`
+- `templates/`: stack 別 `devcontainer.json` / `Dockerfile`（node/python/rust） + 共通 `postCreate.sh`
 - `docs/decision-guide.md`: 判定ルール・バックアップ方針・safe/overwrite の違い・よくある罠

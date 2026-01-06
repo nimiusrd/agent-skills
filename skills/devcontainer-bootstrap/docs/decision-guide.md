@@ -3,6 +3,7 @@
 ## 判定ルール
 - **node**: `package.json`
 - **python**: `pyproject.toml` または `requirements.txt`
+- **rust**: `Cargo.toml`
 - **その他/複数命中**: `unknown` とする → `--stack` を明示（自動選択しない）
 
 ## safe / overwrite の使い分け
@@ -24,7 +25,7 @@
 ## よくある罠と対処
 - **Docker Desktop / デーモン未起動**: devcontainer build で失敗する。Docker を起動して再実行。
 - **postCreate が遅い/失敗する**: ログを確認し、必要なら `postCreate.sh` 内の install コマンドを短縮。失敗しても非致命（スクリプトは `|| true`）。
-- **複数スタック混在 / go.mod のみ**: detect は `unknown` を返す。必ず `--stack` を明示して実行。
+- **複数スタック混在 / go.mod のみ**: detect は `unknown` を返す。必ず `--stack` を明示して実行（例: node+rust 混在など）。
 - **VS Code 拡張が足りない**: `customizations.vscode.extensions` に追加。safe ならマージで壊れにくい。
 - **features 競合**: safe はオブジェクトマージ。上書きされたくない場合は手動で確認し、バックアップから比較する。
 - **CI が不要**: `--add-ci false`（default）。既存 workflow を守りたい場合は safe を選択。
