@@ -5,10 +5,15 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/python:2-3.14-trixie",
 	"features": {
+		// Node.js
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "24"
+		},
+		// GitHub CLI
 		"ghcr.io/devcontainers/features/github-cli:1": {
 			"version": "latest"
 		}
-	}
+	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -17,7 +22,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "pip3 install --user -r requirements.txt",
+	"postCreateCommand": "curl -fsSL https://claude.ai/install.sh | bash"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
