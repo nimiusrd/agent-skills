@@ -1,22 +1,34 @@
 # agent-skills
 
-配布元リポジトリとして、Skill を subtree で取り込む運用を想定。
+AI コーディングエージェント向けスキルコレクション。
 
-## subtree で取り込む例
+## インストール
+
 ```bash
-# 初回追加（例: devcontainer-bootstrap）
-git subtree add --prefix skills/devcontainer-bootstrap https://github.com/nimiusrd/agent-skills.git main --squash
-
-# 更新を取り込む
-git subtree pull --prefix skills/devcontainer-bootstrap https://github.com/nimiusrd/agent-skills.git main --squash
+npx skills add nimiusrd/agent-skills
 ```
 
-## 利用者側の最短導入手順（devcontainer-bootstrap）
+特定のスキルだけをインストールする場合:
+
 ```bash
-# skill を取り込んだリポジトリで
-bash skills/devcontainer-bootstrap/scripts/apply_devcontainer.sh --mode safe
+npx skills add nimiusrd/agent-skills --skill devcontainer-bootstrap
+npx skills add nimiusrd/agent-skills --skill test-generator
+npx skills add nimiusrd/agent-skills --skill property-test-generator
 ```
 
-### 含まれるもの
-- `skills/skill-creator/`（ベースユーティリティ）
-- `skills/devcontainer-bootstrap/`（Dev Container ブートストラップ）
+特定のエージェントに対してインストールする場合:
+
+```bash
+npx skills add nimiusrd/agent-skills -a cursor
+npx skills add nimiusrd/agent-skills -a claude-code
+```
+
+詳しくは [skills.sh](https://skills.sh/) を参照。
+
+## 含まれるスキル
+
+| スキル | 説明 |
+|--------|------|
+| [devcontainer-bootstrap](skills/devcontainer-bootstrap/) | Dev Container を最短で導入/更新するブートストラップ（node/python/rust 対応） |
+| [test-generator](skills/test-generator/) | 変更ファイルに対するテストを自動生成し、カバレッジ 80%+ を目指す |
+| [property-test-generator](skills/property-test-generator/) | プロパティベーステストを設計・生成（fast-check / hypothesis / proptest 対応） |
