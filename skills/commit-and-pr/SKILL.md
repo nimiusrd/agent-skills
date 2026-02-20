@@ -65,10 +65,10 @@ pre-commit hook が失敗した場合: 問題を修正して再ステージし�
 git push -u origin <branch-name>
 ```
 
-PR を作成（**本文は日本語**で記述）：
+PR を作成（**本文は日本語**で記述）。改行が `\n` のままエスケープされないよう、必ず一時ファイル経由で渡す：
 
 ```bash
-gh pr create --title "<簡潔なタイトル（70字以内）>" --body "$(cat <<'EOF'
+cat > /tmp/pr_body.md << 'EOF'
 ## 概要
 - <変更点1>
 - <変更点2>
@@ -78,8 +78,11 @@ gh pr create --title "<簡潔なタイトル（70字以内）>" --body "$(cat <<
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
-)"
+
+gh pr create --title "<簡潔なタイトル（70字以内）>" --body-file /tmp/pr_body.md
 ```
+
+`--body "..."` に直接文字列を渡すと `\n` がエスケープされたまま表示される場合があるため、`--body-file` を使うこと。
 
 PR の URL をユーザーに返す。
 
