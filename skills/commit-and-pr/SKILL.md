@@ -74,7 +74,7 @@ cat > /tmp/pr_body.md << 'EOF'
 - <変更点2>
 
 ## テスト手順
-- [ ] <動作確認の手順>
+- [ ] <CIで自動確認できないもの、手動で確認が必要なものだけ記載>
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
