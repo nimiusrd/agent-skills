@@ -11,6 +11,7 @@ npx skills add nimiusrd/agent-skills
 特定のスキルだけをインストールする場合:
 
 ```bash
+npx skills add nimiusrd/agent-skills --skill cleanup-package-json
 npx skills add nimiusrd/agent-skills --skill commit-and-pr
 npx skills add nimiusrd/agent-skills --skill devcontainer-bootstrap
 npx skills add nimiusrd/agent-skills --skill property-test-generator
@@ -31,6 +32,7 @@ npx skills add nimiusrd/agent-skills -a claude-code
 
 | スキル | 説明 |
 |--------|------|
+| [cleanup-package-json](skills/cleanup-package-json/) | package.json のスクリプト整理・未使用依存削除・ロックファイル再生成 |
 | [commit-and-pr](skills/commit-and-pr/) | 変更をコミットして GitHub Pull Request を作成する一括ワークフロー |
 | [devcontainer-bootstrap](skills/devcontainer-bootstrap/) | Dev Container を最短で導入/更新するブートストラップ（node/python/rust 対応） |
 | [property-test-generator](skills/property-test-generator/) | プロパティベーステストを設計・生成（fast-check / hypothesis / proptest 対応） |
