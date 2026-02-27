@@ -10,19 +10,41 @@ BASE="${1:-$(git rev-parse --abbrev-ref HEAD@{upstream} 2>/dev/null | sed 's|/.*
 MERGE_BASE=$(git merge-base "$BASE" HEAD 2>/dev/null || echo "$BASE")
 
 # Collect changed/added files (staged + unstaged + untracked new files)
-{
-  git diff --name-only --diff-filter=ACMR "$MERGE_BASE" HEAD 2>/dev/null
-  git diff --name-only --diff-filter=ACMR 2>/dev/null
-  git diff --name-only --diff-filter=ACMR --cached 2>/dev/null
-} | sort -u | while IFS= read -r f; do
-  # Skip if file no longer exists
+declare -A seen
+while IFS= read -r -d '' f; do
+  [ -n "$f" ] || continue
   [ -f "$f" ] || continue
-  # Skip test files themselves
-  echo "$f" | grep -qE '\.(test|spec)\.(ts|tsx|js|jsx|rs)$' && continue
-  # Skip config, assets, styles, markdown, lock files
-  echo "$f" | grep -qE '\.(css|scss|less|svg|png|jpg|gif|ico|md|json|lock|toml|yaml|yml)$' && continue
-  # Skip common non-testable paths
-  echo "$f" | grep -qE '(node_modules|dist|build|target|\.git|__mocks__|test/setup)' && continue
-  # Keep only source files
-  echo "$f" | grep -qE '\.(ts|tsx|js|jsx|rs)$' && echo "$f"
-done
+
+  if [ -n "${seen[$f]+x}" ]; then
+    continue
+  fi
+  seen["$f"]=1
+
+  case "$f" in
+    *.test.ts|*.spec.ts|*.test.tsx|*.spec.tsx|*.test.js|*.spec.js|*.test.jsx|*.spec.jsx|*.test.rs|*.spec.rs)
+      continue
+      ;;
+  esac
+
+  case "$f" in
+    *.css|*.scss|*.less|*.svg|*.png|*.jpg|*.gif|*.ico|*.md|*.json|*.lock|*.toml|*.yaml|*.yml)
+      continue
+      ;;
+  esac
+
+  case "$f" in
+    *node_modules*|*dist*|*build*|*target*|*.git*|*__mocks__*|*test/setup*)
+      continue
+      ;;
+  esac
+
+  case "$f" in
+    *.ts|*.tsx|*.js|*.jsx|*.rs)
+      printf '%s\n' "$f"
+      ;;
+  esac
+done < <(
+  git diff --name-only -z --diff-filter=ACMR "$MERGE_BASE" HEAD 2>/dev/null || true
+  git diff --name-only -z --diff-filter=ACMR 2>/dev/null || true
+  git diff --name-only -z --diff-filter=ACMR --cached 2>/dev/null || true
+)
