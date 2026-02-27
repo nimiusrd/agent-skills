@@ -8,6 +8,12 @@ THRESHOLD="${1:-80}"
 shift || true
 TARGET_FILES=("$@")
 
+# Validate THRESHOLD is a non-negative number to prevent code injection into node -e
+if ! [[ "${THRESHOLD}" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+  echo "ERROR: Invalid threshold value: '${THRESHOLD}'. Must be a non-negative number."
+  exit 1
+fi
+
 detect_runner() {
   if [ -f "vitest.config.ts" ] || [ -f "vitest.config.js" ] || \
      ([ -f "vite.config.ts" ] && grep -q "test" vite.config.ts 2>/dev/null); then
@@ -32,8 +38,9 @@ case "$RUNNER" in
     fi
     echo "=== Coverage Report ==="
     echo ""
-    node -e "
+    COV_THRESHOLD="${THRESHOLD}" node -e "
       const cov = require('./$COV_FILE');
+      const threshold = parseFloat(process.env.COV_THRESHOLD);
       const targets = process.argv.slice(1);
       let allPass = true;
       for (const [file, data] of Object.entries(cov)) {
@@ -43,7 +50,7 @@ case "$RUNNER" in
         const total = Object.keys(s).length;
         const covered = Object.values(s).filter(v => v > 0).length;
         const pct = total > 0 ? ((covered / total) * 100).toFixed(1) : '100.0';
-        const status = parseFloat(pct) >= ${THRESHOLD} ? 'PASS' : 'FAIL';
+        const status = parseFloat(pct) >= threshold ? 'PASS' : 'FAIL';
         if (status === 'FAIL') allPass = false;
         console.log(status + ' ' + pct + '% ' + rel);
       }

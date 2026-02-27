@@ -18,11 +18,11 @@ MERGE_BASE=$(git merge-base "$BASE" HEAD 2>/dev/null || echo "$BASE")
   # Skip if file no longer exists
   [ -f "$f" ] || continue
   # Skip test files themselves
-  echo "$f" | grep -qE '\.(test|spec)\.(ts|tsx|js|jsx|rs)$' && continue
+  [[ "$f" =~ \.(test|spec)\.(ts|tsx|js|jsx|rs)$ ]] && continue
   # Skip config, assets, styles, markdown, lock files
-  echo "$f" | grep -qE '\.(css|scss|less|svg|png|jpg|gif|ico|md|json|lock|toml|yaml|yml)$' && continue
+  [[ "$f" =~ \.(css|scss|less|svg|png|jpg|gif|ico|md|json|lock|toml|yaml|yml)$ ]] && continue
   # Skip common non-testable paths
-  echo "$f" | grep -qE '(node_modules|dist|build|target|\.git|__mocks__|test/setup)' && continue
+  [[ "$f" =~ (node_modules|dist|build|target|\.git|__mocks__|test/setup) ]] && continue
   # Keep only source files
-  echo "$f" | grep -qE '\.(ts|tsx|js|jsx|rs)$' && echo "$f"
+  [[ "$f" =~ \.(ts|tsx|js|jsx|rs)$ ]] && printf '%s\n' "$f"
 done
