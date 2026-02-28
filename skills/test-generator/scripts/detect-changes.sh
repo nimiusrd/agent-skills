@@ -4,7 +4,7 @@
 # Outputs one file path per line.
 set -euo pipefail
 
-BASE="${1:-$(git rev-parse --abbrev-ref HEAD@{upstream} 2>/dev/null | sed 's|/.*||' || echo main)}"
+BASE="${1:-$(git rev-parse --abbrev-ref HEAD@{upstream} 2>/dev/null || echo main)}"
 
 # Merge-base so we only see branch-specific changes
 MERGE_BASE=$(git merge-base "$BASE" HEAD 2>/dev/null || echo "$BASE")
