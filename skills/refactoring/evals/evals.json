@@ -1,0 +1,63 @@
+{
+  "skill_name": "refactoring",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "このプロジェクトをリファクタリングしてください。対象ディレクトリは evals/files/small-project/ です。",
+      "expected_output": "並列探索（観点軸のみ）でリファクタリング候補を特定し、refactoring-discoveries/ に MD ファイルを出力。上位候補をテーブルで提案する。小規模なのでディレクトリ軸の分割はスキップされる。",
+      "files": [
+        "evals/files/small-project/src/user_service.py",
+        "evals/files/small-project/src/order_processor.py",
+        "evals/files/small-project/tests/test_user_service.py",
+        "evals/files/small-project/tests/test_order_processor.py"
+      ],
+      "expectations": [
+        "refactoring-discoveries/ ディレクトリが作成され、1つ以上の MD ファイルが出力される",
+        "MD ファイルが discovery-template.md のフォーマットに準拠している（対象・根拠・期待効果・影響範囲・Gate B 材料・推奨アプローチ・メタデータのセクションを含む）",
+        "Agent tool（subagent_type=Explore）が並列で起動される（run_in_background=true）",
+        "小規模プロジェクトのため、ディレクトリ軸の分割はスキップされ、観点軸（複雑性・重複・依存）のみで並列化される",
+        "探索完了後、候補がテーブル形式でユーザーに提案される",
+        "validate_and_create_user が高複雑度の候補として検出される",
+        "format_user_for_* の重複が候補として検出される"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "前回のセッションで発見されたリファクタリング候補が evals/files/existing-discoveries/ にあります。これらを確認して、実行可能な候補をリファクタリングしてください。対象プロジェクトは evals/files/small-project/ です。",
+      "expected_output": "既存の refactoring-discoveries/ を読み取り、新規探索をスキップ。未着手の候補をテーブルで提案し、Gate チェック後にリファクタリングを実行（または Gate 未達で中止）。完了後に MD のステータスを更新する。",
+      "files": [
+        "evals/files/small-project/src/user_service.py",
+        "evals/files/small-project/src/order_processor.py",
+        "evals/files/small-project/tests/test_user_service.py",
+        "evals/files/small-project/tests/test_order_processor.py",
+        "evals/files/existing-discoveries/001-validate_and_create_user.md",
+        "evals/files/existing-discoveries/002-format_user_duplication.md"
+      ],
+      "expectations": [
+        "既存の refactoring-discoveries/ を認識し、新規の並列探索をスキップする",
+        "既存の候補 MD ファイルを読み取り、ステータスが「未着手」の候補をテーブルで提案する",
+        "Gate B チェックが候補ごとに実施される",
+        "候補 002（format_user_duplication）は Gate B 未達（admin/export のテストなし）と判定される",
+        "Gate 未達の候補について、中止理由と推奨テストが提示される",
+        "実行またはスキップ後に MD ファイルのステータスが更新される（完了 or 中止）"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "evals/files/small-project/ の validate_and_create_user 関数をリファクタリングしてください。",
+      "expected_output": "対象が明示されているため候補探索はスキップ。Gate A/B チェック後、バリデーションロジックの抽出リファクタリングを実施。refactoring-discoveries/ に完了記録を出力。",
+      "files": [
+        "evals/files/small-project/src/user_service.py",
+        "evals/files/small-project/tests/test_user_service.py"
+      ],
+      "expectations": [
+        "対象が明示されているため、並列探索（Step 2）はスキップされる",
+        "Gate A（テスト実行）が実施される",
+        "Gate B（テストカバレッジ確認）が実施される",
+        "リファクタリングが実施され、validate_and_create_user の複雑度が低減される",
+        "リファクタリング後にテストが再実行され、振る舞いが保持されていることが確認される",
+        "変更内容のサマリが出力される（種類・箇所・改善点・テスト結果）"
+      ]
+    }
+  ]
+}
