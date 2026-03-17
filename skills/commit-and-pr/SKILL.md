@@ -51,8 +51,6 @@ git commit -m "$(cat <<'EOF'
 <要約行>
 
 <追加コンテキスト（任意）>
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF
 )"
 ```
@@ -81,8 +79,6 @@ cat > /tmp/pr_body.md << 'EOF'
 
 ## テスト手順
 - [ ] <CIで自動確認できないもの、手動で確認が必要なものだけ記載>
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
 
 gh pr create --title "<簡潔なタイトル（70字以内）>" --body-file /tmp/pr_body.md
