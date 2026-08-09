@@ -2,31 +2,65 @@
 
 AI コーディングエージェント向けスキルコレクション。
 
+## 前提条件
+
+- GitHub CLI 2.90.0 以降
+- GitHub CLI の認証（`gh auth login`）
+
+`gh skill` はPublic Previewです。仕様は将来変更される可能性があります。
+
 ## インストール
 
+`gh skill` はGitHub CLIのスキル管理コマンドです。`gh skills` という複数形のエイリアスも利用できます。
+
+すべてのスキルをCodexのユーザースコープへインストールする場合:
+
 ```bash
-npx skills add nimiusrd/agent-skills
+gh skill install nimiusrd/agent-skills --all --agent codex --scope user
 ```
 
 特定のスキルだけをインストールする場合:
 
 ```bash
-npx skills add nimiusrd/agent-skills --skill cleanup-package-json
-npx skills add nimiusrd/agent-skills --skill commit-and-pr
-npx skills add nimiusrd/agent-skills --skill devcontainer-bootstrap
-npx skills add nimiusrd/agent-skills --skill property-test-generator
-npx skills add nimiusrd/agent-skills --skill refactoring
-npx skills add nimiusrd/agent-skills --skill test-generator
+gh skill install nimiusrd/agent-skills cleanup-package-json --agent codex --scope user
+gh skill install nimiusrd/agent-skills commit-and-pr --agent codex --scope user
+gh skill install nimiusrd/agent-skills devcontainer-bootstrap --agent codex --scope user
+gh skill install nimiusrd/agent-skills property-test-generator --agent codex --scope user
+gh skill install nimiusrd/agent-skills refactoring --agent codex --scope user
+gh skill install nimiusrd/agent-skills test-generator --agent codex --scope user
 ```
 
-特定のエージェントに対してインストールする場合:
+`codex` は対象エージェントに合わせて変更できます（例: `claude-code`, `cursor`, `github-copilot`）。プロジェクト単位で管理する場合は `--scope project` を指定してください。
+
+## 確認・更新
 
 ```bash
-npx skills add nimiusrd/agent-skills -a cursor
-npx skills add nimiusrd/agent-skills -a claude-code
+# インストール済みスキルを一覧表示
+gh skill list
+
+# 更新の有無だけ確認
+gh skill update --dry-run
+
+# すべてのスキルを更新
+gh skill update --all
+
+# インストール前に内容をプレビュー
+gh skill preview nimiusrd/agent-skills refactoring
 ```
 
-詳しくは [skills.sh](https://skills.sh/) を参照。
+## 公開
+
+公開前に、Agent Skills仕様への適合性を検証します。
+
+```bash
+gh skill publish --dry-run
+```
+
+検証に成功したら、SemVer形式のタグを指定してGitHub Releaseを作成します。
+
+```bash
+gh skill publish --tag v1.0.0
+```
 
 ## 含まれるスキル
 

@@ -1,5 +1,6 @@
 ---
 name: cleanup-package-json
+license: MIT
 description: >
   package.json のスクリプトと依存関係を整理・クリーンアップする。
   「package.jsonをきれいにしたい」「スクリプトを整理したい」「未使用の依存を削除したい」

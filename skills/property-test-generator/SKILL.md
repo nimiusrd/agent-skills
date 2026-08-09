@@ -1,5 +1,6 @@
 ---
 name: property-test-generator
+license: MIT
 description: >
   Design and generate property-based tests (PBT) for changed files in the
   current git branch. Extracts specifications, designs properties (invariants,
