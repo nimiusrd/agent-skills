@@ -49,14 +49,6 @@ gh skill install nimiusrd/agent-skills refactoring --scope project
 
 ほかのスキルを指定する場合は、`refactoring` を収録スキルの名前に置き換えてください。
 
-### すべてのスキルをインストールする（必要な場合のみ）
-
-複数のスキルをまとめて試す場合は、`--all` を指定します。
-
-```bash
-gh skill install nimiusrd/agent-skills --all --scope project
-```
-
 ## ローカルのスキルをインストールして検証する
 
 作成中のスキルは、GitHub に公開する前に `--from-local` で対象プロジェクトへインストールして動作を確認できます。ローカルインストールではファイルがコピーされるため、`SKILL.md` を修正した場合は再インストールしてください。
@@ -80,10 +72,6 @@ cd /path/to/target-project
 # 1つのスキルだけをインストール
 gh skill install /path/to/agent-skills refactoring \
   --from-local --scope project
-
-# 必要な場合にすべてのスキルをインストール
-gh skill install /path/to/agent-skills \
-  --from-local --all --scope project
 ```
 
 ### 3. インストール結果を確認して実際に使う
