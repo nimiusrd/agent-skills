@@ -15,13 +15,13 @@ AI コーディングエージェントの作業を再利用可能な手順と�
 非対話環境では利用中のエージェントを自動判定せず、CLIの既定のインストール先が使われる場合があります。インストール後に配置先を確認し、意図したエージェントから利用できることを確認してください。
 
 ```bash
-gh skill install nimiusrd/agent-skills refactoring --scope project
+gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 ```
 
 インストール後は、利用するエージェント上で次のように依頼できます。
 
 ```text
-このコードを振る舞いを変えずにリファクタリングして
+変更をコミットして PR を作って
 ```
 
 ## 収録スキル
@@ -44,10 +44,10 @@ gh skill install nimiusrd/agent-skills refactoring --scope project
 リポジトリ名の後にスキル名を指定します。
 
 ```bash
-gh skill install nimiusrd/agent-skills refactoring --scope project
+gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 ```
 
-ほかのスキルを指定する場合は、`refactoring` を収録スキルの名前に置き換えてください。
+ほかのスキルを指定する場合は、`commit-and-pr` を収録スキルの名前に置き換えてください。
 
 ## ローカルのスキルをインストールして検証する
 
@@ -70,7 +70,7 @@ gh skill publish --dry-run
 cd /path/to/target-project
 
 # 1つのスキルだけをインストール
-gh skill install /path/to/agent-skills refactoring \
+gh skill install /path/to/agent-skills commit-and-pr \
   --from-local --scope project
 ```
 
@@ -90,7 +90,7 @@ gh skill list --scope project --json skillName,agentHosts,path
 修正を反映して再確認する場合は、`--force` を付けて同じコマンドを再実行します。
 
 ```bash
-gh skill install /path/to/agent-skills refactoring \
+gh skill install /path/to/agent-skills commit-and-pr \
   --from-local --scope project --force
 ```
 
@@ -107,7 +107,7 @@ gh skill update --dry-run
 gh skill update --all
 
 # インストール前に内容をプレビュー
-gh skill preview nimiusrd/agent-skills refactoring
+gh skill preview nimiusrd/agent-skills commit-and-pr
 ```
 
 ## 開発
