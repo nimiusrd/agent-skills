@@ -12,10 +12,9 @@ AI コーディングエージェントの作業を再利用可能な手順と�
 - GitHub CLI で認証済みであること（`gh auth login`）
 
 すべてのスキルを、現在のプロジェクトで使うエージェントのプロジェクトスコープへインストールします。コマンドは対象プロジェクトのルートで実行してください。
-非対話実行ではエージェントを自動判定しないため、`AGENT_NAME` を利用するエージェント名に置き換えて指定します。
+`AGENT_NAME` は `gh skill install -h` で確認した値に置き換えてください。
 
 ```bash
-# AGENT_NAME は利用するエージェント名に置き換える
 gh skill install nimiusrd/agent-skills --all --agent AGENT_NAME --scope project
 ```
 
@@ -45,18 +44,10 @@ gh skill install nimiusrd/agent-skills --all --agent AGENT_NAME --scope project
 リポジトリ名の後にスキル名を指定します。
 
 ```bash
-# AGENT_NAME は利用するエージェント名に置き換える
 gh skill install nimiusrd/agent-skills refactoring --agent AGENT_NAME --scope project
 ```
 
 ほかのスキルを指定する場合は、`refactoring` を収録スキルの名前に置き換えてください。
-
-### 対象エージェントを指定する
-
-- エージェントを明示する場合は、`--agent AGENT_NAME` を追加します。利用可能な値は `gh skill install --help` で確認できます。
-- `--agent` を省略した非対話実行では、CLIの既定エージェントが選ばれます。利用中のエージェントへ確実にインストールするには、`--agent AGENT_NAME` を指定してください。
-- `--scope project` を指定すると、現在のプロジェクト内だけでスキルを利用できます。
-- `gh skill` には複数形の `gh skills` エイリアスもあります。
 
 ## ローカルのスキルをインストールして検証する
 
