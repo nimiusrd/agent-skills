@@ -11,11 +11,11 @@ AI コーディングエージェントの作業を再利用可能な手順と�
 - GitHub CLI 2.90.0 以降
 - GitHub CLI で認証済みであること（`gh auth login`）
 
-すべてのスキルを、現在のプロジェクトで使うエージェントのプロジェクトスコープへインストールします。コマンドは対象プロジェクトのルートで実行してください。
-`AGENT_NAME` は `gh skill install -h` で確認した値に置き換えてください。
+すべてのスキルを、現在のプロジェクトのプロジェクトスコープへインストールします。コマンドは対象プロジェクトのルートで実行してください。
+非対話環境では利用中のエージェントを自動判定せず、CLIの既定のインストール先が使われる場合があります。インストール後に配置先を確認し、意図したエージェントから利用できることを確認してください。
 
 ```bash
-gh skill install nimiusrd/agent-skills --all --agent AGENT_NAME --scope project
+gh skill install nimiusrd/agent-skills --all --scope project
 ```
 
 インストール後は、利用するエージェント上で次のように依頼できます。
@@ -44,7 +44,7 @@ gh skill install nimiusrd/agent-skills --all --agent AGENT_NAME --scope project
 リポジトリ名の後にスキル名を指定します。
 
 ```bash
-gh skill install nimiusrd/agent-skills refactoring --agent AGENT_NAME --scope project
+gh skill install nimiusrd/agent-skills refactoring --scope project
 ```
 
 ほかのスキルを指定する場合は、`refactoring` を収録スキルの名前に置き換えてください。
@@ -71,18 +71,18 @@ cd /path/to/target-project
 
 # 1つのスキルだけをインストール
 gh skill install /path/to/agent-skills refactoring \
-  --from-local --agent AGENT_NAME --scope project
+  --from-local --scope project
 
 # すべてのスキルをインストールする場合
 gh skill install /path/to/agent-skills \
-  --from-local --all --agent AGENT_NAME --scope project
+  --from-local --all --scope project
 ```
 
 ### 3. インストール結果を確認して実際に使う
 
 ```bash
-# プロジェクトスコープの対象エージェントのスキルを一覧表示
-gh skill list --agent AGENT_NAME --scope project
+# プロジェクトスコープのスキルと配置先を一覧表示
+gh skill list --scope project --json skillName,agentHosts,path
 ```
 
 対象プロジェクトでエージェントを起動し、スキルが想定どおり適用される依頼を実行します。
@@ -95,7 +95,7 @@ gh skill list --agent AGENT_NAME --scope project
 
 ```bash
 gh skill install /path/to/agent-skills refactoring \
-  --from-local --agent AGENT_NAME --scope project --force
+  --from-local --scope project --force
 ```
 
 ## 確認・更新
