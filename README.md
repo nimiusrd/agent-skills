@@ -11,17 +11,17 @@ AI コーディングエージェントの作業を再利用可能な手順と�
 - GitHub CLI 2.90.0 以降
 - GitHub CLI で認証済みであること（`gh auth login`）
 
-すべてのスキルを、現在のプロジェクトのプロジェクトスコープへインストールします。コマンドは対象プロジェクトのルートで実行してください。
+必要なスキルだけを、現在のプロジェクトのプロジェクトスコープへインストールします。コマンドは対象プロジェクトのルートで実行してください。
 非対話環境では利用中のエージェントを自動判定せず、CLIの既定のインストール先が使われる場合があります。インストール後に配置先を確認し、意図したエージェントから利用できることを確認してください。
 
 ```bash
-gh skill install nimiusrd/agent-skills --all --scope project
+gh skill install nimiusrd/agent-skills refactoring --scope project
 ```
 
 インストール後は、利用するエージェント上で次のように依頼できます。
 
 ```text
-このブランチの変更にテストを追加して
+このコードを振る舞いを変えずにリファクタリングして
 ```
 
 ## 収録スキル
@@ -49,6 +49,14 @@ gh skill install nimiusrd/agent-skills refactoring --scope project
 
 ほかのスキルを指定する場合は、`refactoring` を収録スキルの名前に置き換えてください。
 
+### すべてのスキルをインストールする（必要な場合のみ）
+
+複数のスキルをまとめて試す場合は、`--all` を指定します。
+
+```bash
+gh skill install nimiusrd/agent-skills --all --scope project
+```
+
 ## ローカルのスキルをインストールして検証する
 
 作成中のスキルは、GitHub に公開する前に `--from-local` で対象プロジェクトへインストールして動作を確認できます。ローカルインストールではファイルがコピーされるため、`SKILL.md` を修正した場合は再インストールしてください。
@@ -73,7 +81,7 @@ cd /path/to/target-project
 gh skill install /path/to/agent-skills refactoring \
   --from-local --scope project
 
-# すべてのスキルをインストールする場合
+# 必要な場合にすべてのスキルをインストール
 gh skill install /path/to/agent-skills \
   --from-local --all --scope project
 ```
