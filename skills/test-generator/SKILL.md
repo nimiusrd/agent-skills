@@ -1,5 +1,6 @@
 ---
 name: test-generator
+license: MIT
 description: >
   現在の git ブランチで変更されたファイルに対してテストを生成・更新し、
   ステートメントカバレッジ（目標: 80%以上）で評価する。
