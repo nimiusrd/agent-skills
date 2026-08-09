@@ -84,7 +84,7 @@ gh skill list --scope project --json skillName,agentHosts,path
 対象プロジェクトでエージェントを起動し、スキルが想定どおり適用される依頼を実行します。
 
 ```text
-このプロジェクトの package.json を整理して
+変更をコミットして PR を作って
 ```
 
 修正を反映して再確認する場合は、`--force` を付けて同じコマンドを再実行します。
