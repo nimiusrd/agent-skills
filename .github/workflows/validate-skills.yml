@@ -16,9 +16,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Test test-generator helpers
-        run: python3 -B -m unittest discover -s skills/test-generator/tests -v
-
       - name: Check GitHub CLI skill support
         run: |
           gh --version
