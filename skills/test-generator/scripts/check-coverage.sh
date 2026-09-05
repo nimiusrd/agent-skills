@@ -1,80 +1,73 @@
 #!/usr/bin/env bash
-# Run tests with coverage and report per-file coverage for specified files.
-# Usage: check-coverage.sh <threshold> [file1 file2 ...]
-# If no files specified, reports all. Exit 0 if all files meet threshold, 1 otherwise.
+# 今回のテスト実行で生成した Istanbul JSON だけを検査する。
+# Usage: check-coverage.sh [threshold=80] [files...] [-- command args...]
+# 例: check-coverage.sh 80 src/main.ts -- npm run test --
 set -euo pipefail
 
-THRESHOLD="${1:-80}"
+THRESHOLD="${1-80}"
 if ! [[ "$THRESHOLD" =~ ^([0-9]{1,2}([.][0-9]+)?|100([.]0+)?)$ ]]; then
-  echo "ERROR: threshold must be a number between 0 and 100."
+  echo "ERROR: threshold must be a number between 0 and 100." >&2
   exit 1
 fi
-shift || true
-TARGET_FILES=("$@")
+if [ "$#" -gt 0 ]; then
+  shift
+fi
 
-detect_runner() {
-  if [ -f "vitest.config.ts" ] || [ -f "vitest.config.js" ] || \
-     ([ -f "vite.config.ts" ] && grep -q "test" vite.config.ts 2>/dev/null); then
-    echo "vitest"
-  elif [ -f "Cargo.toml" ]; then
-    echo "cargo"
-  else
-    echo "unknown"
+TARGET_FILES=()
+CUSTOM_COMMAND=()
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = "--" ]; then
+    shift
+    if [ "$#" -eq 0 ]; then
+      echo "ERROR: a command is required after --." >&2
+      exit 1
+    fi
+    CUSTOM_COMMAND=("$@")
+    break
   fi
-}
+  TARGET_FILES[${#TARGET_FILES[@]}]="$1"
+  shift
+done
 
-RUNNER=$(detect_runner)
+if ! command -v node >/dev/null 2>&1; then
+  echo "ERROR: node is required to validate the coverage report." >&2
+  exit 1
+fi
 
-case "$RUNNER" in
-  vitest)
-    if [ -x "./node_modules/.bin/vitest" ]; then
-      VITEST_BIN="./node_modules/.bin/vitest"
-    elif command -v vitest >/dev/null 2>&1; then
-      VITEST_BIN="$(command -v vitest)"
-    else
-      echo "ERROR: vitest executable not found."
-      echo "Install project dependencies and retry."
-      exit 1
-    fi
+if [ "${#CUSTOM_COMMAND[@]}" -gt 0 ]; then
+  TEST_COMMAND=("${CUSTOM_COMMAND[@]}")
+elif [ -x "./node_modules/.bin/vitest" ]; then
+  TEST_COMMAND=("./node_modules/.bin/vitest" run)
+elif command -v vitest >/dev/null 2>&1; then
+  TEST_COMMAND=("$(command -v vitest)" run)
+elif [ -f Cargo.toml ]; then
+  echo "ERROR: Rust coverage is not supported by this Istanbul JSON checker." >&2
+  echo "Use the project's cargo-llvm-cov coverage command instead." >&2
+  exit 1
+else
+  echo "ERROR: vitest executable not found. Install project dependencies and retry." >&2
+  exit 1
+fi
 
-    "$VITEST_BIN" run --coverage >/dev/null 2>&1 || true
-    COV_FILE="coverage/coverage-final.json"
-    if [ ! -f "$COV_FILE" ]; then
-      echo "ERROR: Coverage file not found at $COV_FILE"
-      echo "Ensure @vitest/coverage-v8 or @vitest/coverage-istanbul is installed."
-      exit 1
-    fi
-    echo "=== Coverage Report ==="
-    echo ""
-    THRESHOLD="$THRESHOLD" node -e '
-      const path = require("path");
-      const [covFile, ...targets] = process.argv.slice(1);
-      const threshold = Number(process.env.THRESHOLD);
-      const cov = require(path.resolve(covFile));
-      let allPass = true;
-      for (const [file, data] of Object.entries(cov)) {
-        const rel = file.replace(process.cwd() + "/", "");
-        if (targets.length > 0 && !targets.some(t => rel.includes(t))) continue;
-        const s = data.s || {};
-        const total = Object.keys(s).length;
-        const covered = Object.values(s).filter(v => v > 0).length;
-        const pct = total > 0 ? ((covered / total) * 100).toFixed(1) : "100.0";
-        const status = Number(pct) >= threshold ? "PASS" : "FAIL";
-        if (status === "FAIL") allPass = false;
-        console.log(status + " " + pct + "% " + rel);
-      }
-      process.exit(allPass ? 0 : 1);
-    ' "$COV_FILE" "${TARGET_FILES[@]}" 2>/dev/null
-    ;;
-  cargo)
-    echo "Rust coverage requires cargo-llvm-cov. Run:"
-    echo "  cargo llvm-cov --json | cargo llvm-cov report"
-    echo "See AGENTS.md for project-specific Rust coverage commands."
-    exit 1
-    ;;
-  *)
-    echo "ERROR: Could not detect test runner."
-    echo "Supported: vitest, cargo"
-    exit 1
-    ;;
-esac
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COVERAGE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/test-generator-coverage.XXXXXX")"
+COVERAGE_FILE="$COVERAGE_DIR/coverage-final.json"
+# 成功・失敗のどちらでも今回の生成先を表示し、調査用に保持する。
+echo "Coverage report: $COVERAGE_FILE"
+# 既存 npm script の --coverage と同じ boolean option を重ねない。
+if "${TEST_COMMAND[@]}" --coverage.enabled=true --coverage.reporter=json "--coverage.reportsDirectory=$COVERAGE_DIR"; then
+  :
+else
+  status=$?
+  echo "ERROR: test command failed (exit $status); coverage was not evaluated." >&2
+  exit "$status"
+fi
+
+if [ ! -f "$COVERAGE_FILE" ]; then
+  echo "ERROR: this test run did not create $COVERAGE_FILE" >&2
+  echo "Check the coverage provider and whether the command forwards Vitest options." >&2
+  exit 1
+fi
+
+# Bash 3.2 の nounset は空配列の通常展開を拒否するため、未要素時は展開しない。
+node "$SCRIPT_DIR/read-coverage.cjs" "$COVERAGE_FILE" "$THRESHOLD" ${TARGET_FILES[@]+"${TARGET_FILES[@]}"}

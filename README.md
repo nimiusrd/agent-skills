@@ -34,7 +34,7 @@ gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 | [devcontainer-bootstrap](skills/devcontainer-bootstrap/SKILL.md) | Node.js、Python、Rust 向け Dev Container の導入・安全な更新 | 「このリポジトリに Dev Container を導入して」 |
 | [property-test-generator](skills/property-test-generator/SKILL.md) | fast-check、Hypothesis、proptest を使ったプロパティベーステストの設計・生成 | 「変更した関数にプロパティテストを追加して」 |
 | [refactoring](skills/refactoring/SKILL.md) | 外部仕様を維持したまま内部構造を改善 | 「このコードを振る舞いを変えずにリファクタリングして」 |
-| [test-generator](skills/test-generator/SKILL.md) | 変更ファイルへのテスト追加とカバレッジ確認 | 「このブランチの変更をテストして」 |
+| [test-generator](skills/test-generator/SKILL.md) | 変更分・指定対象・全体のテスト候補探索とカバレッジ改善 | 「カバレッジ不足を探してテストを追加して」 |
 
 各スキルの詳しい動作、制約、対応ツールは、それぞれの `SKILL.md` を参照してください。
 
