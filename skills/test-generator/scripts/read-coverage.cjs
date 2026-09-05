@@ -1,6 +1,10 @@
-// Istanbul JSON を検証してから、丸め前の値で statement coverage を判定する。
+// 指定された Istanbul JSON だけを読み、statement coverage のしきい値を判定する。
+// テストは実行しない。PASS はテスト成功やレポートの鮮度を保証しない。
 const fs = require('node:fs');
 const path = require('node:path');
+
+const USAGE = 'Usage: node read-coverage.cjs <report.json> <threshold> [files...]';
+const SCOPE = 'Scope: report thresholds only; test success and report freshness are not verified.';
 
 function object(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -24,12 +28,28 @@ function counters(value, label, arrays = false) {
 }
 
 function main() {
-  const [reportFile, rawThreshold, ...targets] = process.argv.slice(2);
-  const threshold = Number(rawThreshold);
-  if (!reportFile || !rawThreshold || !Number.isFinite(threshold) || threshold < 0 || threshold > 100) {
-    fail('expected report path and a threshold between 0 and 100');
+  const args = process.argv.slice(2);
+  if (args.length === 1 && args[0] === '--help') {
+    console.log(`${USAGE}
+
+既存の Istanbul coverage-final.json 形式を読み取り専用で検査します。
+プロジェクトのルートを cwd にしてください。対象省略時は全ファイルを検査します。
+threshold は 0〜100 の十進数、files は cwd 基準の相対パスまたは絶対パスです。
+対象は正規化後の完全一致で選択し、しきい値の判定には丸め前の比率を使います。
+実行可能な statement がないファイルは N/A、測定可能な対象がなければエラーです。
+終了コード: 0 = 測定可能な全対象がしきい値以上、1 = 未達または入力エラー。
+テストの実行・レポートの探索・ファイルの変更は行いません。
+PASS はこのレポートのしきい値判定だけを表し、テスト成功や鮮度を保証しません。
+${SCOPE}`);
+    return 0;
+  }
+  const [reportFile, rawThreshold, ...targets] = args;
+  if (!reportFile || rawThreshold === undefined) {
+    console.error(USAGE);
+    fail('report path and threshold are required');
   }
   if (!/^([0-9]{1,2}(\.[0-9]+)?|100(\.0+)?)$/.test(rawThreshold)) {
+    console.error(USAGE);
     fail('threshold must be a decimal number between 0 and 100');
   }
   // 29/50*100 のような二進浮動小数点誤差も判定へ持ち込まない。
@@ -72,6 +92,8 @@ function main() {
 
   let allPass = true;
   let measured = 0;
+  console.log(`Report: ${path.resolve(reportFile)}`);
+  console.log(SCOPE);
   console.log('=== Coverage Report ===');
   for (const entry of selected) {
     if (entry.total === 0) {
