@@ -28,7 +28,7 @@ gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 
 | スキル | 用途 | 依頼例 |
 |---|---|---|
-| [cleanup-package-json](skills/cleanup-package-json/SKILL.md) | `package.json` のスクリプト整理、未使用依存の削除、ロックファイルの再生成 | 「package.json を整理して」 |
+| [maintain-package-json](skills/maintain-package-json/SKILL.md) | `package.json` のスクリプト整理、未使用依存の削除、依存の更新・メンテナンス状況の確認 | 「依存を更新して、保守状況も確認して」 |
 | [codex-review-loop](skills/codex-review-loop/SKILL.md) | PR の Codex 再レビュー依頼、指摘対応、マージ可能な状態の確認 | 「Codex レビューを回して」 |
 | [commit-and-pr](skills/commit-and-pr/SKILL.md) | 変更内容の確認、コミット、プッシュ、Pull Request 作成 | 「変更をコミットして PR を作って」 |
 | [devcontainer-bootstrap](skills/devcontainer-bootstrap/SKILL.md) | Node.js、Python、Rust 向け Dev Container の導入・安全な更新 | 「このリポジトリに Dev Container を導入して」 |
