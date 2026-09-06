@@ -1,0 +1,8 @@
+{
+  "name": "fixture-helper",
+  "version": "2.0.0",
+  "main": "index.cjs",
+  "engines": {
+    "node": ">=18"
+  }
+}

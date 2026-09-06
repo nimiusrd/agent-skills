@@ -1,0 +1,84 @@
+{
+  "skill_name": "maintain-package-json",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "evals/files/limited-update を一時ディレクトリへコピーして対象にしてください。package.json の依存と更新候補を調査し、結果だけ報告してください。ファイルは変更しないでください。ネットワークは使えません。これは架空のローカルパッケージで、releases.json と vendor/ が今回提供された情報のすべてです。保守状況について判断できない点も明示してください。",
+      "expected_output": "現在のバージョン・ローカル更新候補・互換性の差を整理し、保守状況は未確認とする。対象ファイルを変更しない。",
+      "files": [
+        "evals/files/limited-update/index.cjs",
+        "evals/files/limited-update/package-lock.json",
+        "evals/files/limited-update/package.json",
+        "evals/files/limited-update/releases.json",
+        "evals/files/limited-update/test.cjs",
+        "evals/files/limited-update/vendor/formatter-v1/index.cjs",
+        "evals/files/limited-update/vendor/formatter-v1/package.json",
+        "evals/files/limited-update/vendor/formatter-v2/index.cjs",
+        "evals/files/limited-update/vendor/formatter-v2/package.json",
+        "evals/files/limited-update/vendor/helper-v1/index.cjs",
+        "evals/files/limited-update/vendor/helper-v1/package.json",
+        "evals/files/limited-update/vendor/helper-v2/index.cjs",
+        "evals/files/limited-update/vendor/helper-v2/package.json"
+      ],
+      "expectations": [
+        "実行前後で package.json、package-lock.json、ソース、テスト、vendor/、releases.json の全ファイルの内容が一致する",
+        "fixture-formatter の現行 1.0.0 と候補 1.0.1、fixture-helper の現行 1.0.0 と候補 2.0.0 を区別する",
+        "helper の括弧形式変更を互換性リスクとして指摘する",
+        "提供された情報だけでは保守継続・終了を判断できないと明示する",
+        "インストール・更新・依存追加を行わず、外部レジストリに架空パッケージを問い合わせない"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "evals/files/dynamic-plugin を一時ディレクトリへコピーして対象にしてください。未使用の依存だけを削除してください。既存の実行結果を保ってください。依存は vendor/ にある架空のローカルパッケージです。ネットワークは使わず、npm の offline 操作で検証できます。",
+      "expected_output": "設定から組み立てる動的 require を追跡して plugin を保持し、unused のみ削除。ロックファイルを整合させ既存テストを実行する。",
+      "files": [
+        "evals/files/dynamic-plugin/index.cjs",
+        "evals/files/dynamic-plugin/package-lock.json",
+        "evals/files/dynamic-plugin/package.json",
+        "evals/files/dynamic-plugin/plugin.json",
+        "evals/files/dynamic-plugin/test.cjs",
+        "evals/files/dynamic-plugin/vendor/plugin-upper/index.cjs",
+        "evals/files/dynamic-plugin/vendor/plugin-upper/package.json",
+        "evals/files/dynamic-plugin/vendor/unused/index.cjs",
+        "evals/files/dynamic-plugin/vendor/unused/package.json"
+      ],
+      "expectations": [
+        "index.cjs の require(config.prefix + config.name) と plugin.json を照合し fixture-plugin-upper が実際に使われていることを特定する",
+        "package.json と package-lock.json から fixture-unused の依存参照を削除する",
+        "fixture-plugin-upper の依存宣言と解決先を保持する",
+        "index.cjs、plugin.json、test.cjs の内容を変更して動的利用や検証を回避しない",
+        "npm ci --offline 相当と npm test が成功し、HELLO の出力仕様を保持する",
+        "別のパッケージマネージャーのロックファイルや調査用依存を追加しない"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "evals/files/limited-update を一時ディレクトリへコピーして対象にしてください。fixture-formatter だけを提供済みの 1.0.1（file:vendor/formatter-v2）へ更新してください。helper など他の依存は変更しないでください。releases.json のローカル配布情報を使い、ネットワークなしで npm の offline 操作と既存テストで検証してください。",
+      "expected_output": "formatter の宣言とロックをローカル 1.0.1 に更新する。helper の 1.0.0 とソースを保ち、既存テストとインストール整合を検証する。",
+      "files": [
+        "evals/files/limited-update/index.cjs",
+        "evals/files/limited-update/package-lock.json",
+        "evals/files/limited-update/package.json",
+        "evals/files/limited-update/releases.json",
+        "evals/files/limited-update/test.cjs",
+        "evals/files/limited-update/vendor/formatter-v1/index.cjs",
+        "evals/files/limited-update/vendor/formatter-v1/package.json",
+        "evals/files/limited-update/vendor/formatter-v2/index.cjs",
+        "evals/files/limited-update/vendor/formatter-v2/package.json",
+        "evals/files/limited-update/vendor/helper-v1/index.cjs",
+        "evals/files/limited-update/vendor/helper-v1/package.json",
+        "evals/files/limited-update/vendor/helper-v2/index.cjs",
+        "evals/files/limited-update/vendor/helper-v2/package.json"
+      ],
+      "expectations": [
+        "fixture-formatter の宣言が file:vendor/formatter-v2、ロックの解決先が vendor/formatter-v2 の 1.0.1 になる",
+        "fixture-helper の宣言 file:vendor/helper-v1 とロックの vendor/helper-v1 の 1.0.0 を保持する",
+        "index.cjs、test.cjs、vendor/、releases.json を変更せず、無関係な移行をしない",
+        "npm ci --offline 相当と npm test が成功する",
+        "依存追加・別ロックファイルの生成・全依存の最新化を行わない",
+        "更新前後バージョンと実行した検証を報告し、未実行検証を成功扱いしない"
+      ]
+    }
+  ]
+}
