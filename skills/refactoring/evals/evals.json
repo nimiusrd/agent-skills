@@ -3,8 +3,8 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "このプロジェクトをリファクタリングしてください。対象ディレクトリは evals/files/small-project/ です。",
-      "expected_output": "並列探索（観点軸のみ）でリファクタリング候補を特定し、refactoring-discoveries/ に MD ファイルを出力。上位候補をテーブルで提案する。小規模なのでディレクトリ軸の分割はスキップされる。",
+      "prompt": "このプロジェクトのリファクタリング候補を調査してください。対象ディレクトリは evals/files/small-project/ です。今回は候補の報告だけにしてください。",
+      "expected_output": "規模に応じた探索で候補を特定し、重複を統合した候補記録と根拠付きの提案を返す。探索方法にかかわらずソースは変更しない。",
       "files": [
         "evals/files/small-project/src/user_service.py",
         "evals/files/small-project/src/order_processor.py",
@@ -14,17 +14,17 @@
       "expectations": [
         "refactoring-discoveries/ ディレクトリが作成され、1つ以上の MD ファイルが出力される",
         "MD ファイルが discovery-template.md のフォーマットに準拠している（対象・根拠・期待効果・影響範囲・Gate B 材料・推奨アプローチ・メタデータのセクションを含む）",
-        "Agent tool（subagent_type=Explore）が並列で起動される（run_in_background=true）",
-        "小規模プロジェクトのため、ディレクトリ軸の分割はスキップされ、観点軸（複雑性・重複・依存）のみで並列化される",
         "探索完了後、候補がテーブル形式でユーザーに提案される",
         "validate_and_create_user が高複雑度の候補として検出される",
-        "format_user_for_* の重複が候補として検出される"
+        "format_user_for_* の重複が候補として検出される",
+        "候補番号が重複せず、同一ファイル・シンボルの複数観点は1候補に統合される",
+        "調査のみの指示を守り、ソースを変更しない"
       ]
     },
     {
       "id": 2,
       "prompt": "前回のセッションで発見されたリファクタリング候補が evals/files/existing-discoveries/ にあります。これらを確認して、実行可能な候補をリファクタリングしてください。対象プロジェクトは evals/files/small-project/ です。",
-      "expected_output": "既存の refactoring-discoveries/ を読み取り、新規探索をスキップ。未着手の候補をテーブルで提案し、Gate チェック後にリファクタリングを実行（または Gate 未達で中止）。完了後に MD のステータスを更新する。",
+      "expected_output": "指定された既存候補を現行コードとテストに照合し、行範囲と根拠を更新する。両候補とも重要パスのテスト不足を具体的に示して中止し、候補の状態と中止ログに記録する。",
       "files": [
         "evals/files/small-project/src/user_service.py",
         "evals/files/small-project/src/order_processor.py",
@@ -34,29 +34,96 @@
         "evals/files/existing-discoveries/002-format_user_duplication.md"
       ],
       "expectations": [
-        "既存の refactoring-discoveries/ を認識し、新規の並列探索をスキップする",
-        "既存の候補 MD ファイルを読み取り、ステータスが「未着手」の候補をテーブルで提案する",
-        "Gate B チェックが候補ごとに実施される",
-        "候補 002（format_user_duplication）は Gate B 未達（admin/export のテストなし）と判定される",
-        "Gate 未達の候補について、中止理由と推奨テストが提示される",
-        "実行またはスキップ後に MD ファイルのステータスが更新される（完了 or 中止）"
+        "ユーザー指定の既存候補を読み、現行コード・テスト・行範囲と照合する",
+        "有効な既存候補が依頼範囲を満たすため、不要な全面再探索を行わない",
+        "候補001は過去の「カバー済み」記載を鵜呑みにせず、電話・住所・パスワード条件等の不足を検出する",
+        "候補002はadmin/exportのテスト不足を検出する",
+        "Gate未達の候補のソースを変更せず、中止理由と推奨テストを報告する",
+        "指定された既存候補のステータスを中止に更新し、中止ログを残す",
+        "既存の実施指示があるため、候補番号の選択を再び要求しない"
       ]
     },
     {
       "id": 3,
       "prompt": "evals/files/small-project/ の validate_and_create_user 関数をリファクタリングしてください。",
-      "expected_output": "対象が明示されているため候補探索はスキップ。Gate A/B チェック後、バリデーションロジックの抽出リファクタリングを実施。refactoring-discoveries/ に完了記録を出力。",
+      "expected_output": "対象指定のため探索を省略する。Gate A を実行し、Gate B で未テストの重要パスを特定してリファクタリングを中止する。完了記録は作成しない。",
       "files": [
         "evals/files/small-project/src/user_service.py",
         "evals/files/small-project/tests/test_user_service.py"
       ],
       "expectations": [
-        "対象が明示されているため、並列探索（Step 2）はスキップされる",
-        "Gate A（テスト実行）が実施される",
-        "Gate B（テストカバレッジ確認）が実施される",
-        "リファクタリングが実施され、validate_and_create_user の複雑度が低減される",
-        "リファクタリング後にテストが再実行され、振る舞いが保持されていることが確認される",
-        "変更内容のサマリが出力される（種類・箇所・改善点・テスト結果）"
+        "対象指定のため候補探索を省略する",
+        "既存テストを実行し、実際の成否を報告する",
+        "電話・住所・パスワード条件など変更範囲に含まれる重要パスの不足を具体的に挙げる",
+        "テストが成功してもGate B未達なら対象関数を変更しない",
+        "中止ログと推奨テストを示し、完了扱いの候補ファイルを作成しない"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "evals/files/small-project/ のリファクタリング候補だけを調査してください。この環境にはサブエージェント機能がありません。",
+      "expected_output": "利用可能な読み取り手段で逐次調査し、根拠付きの候補を記録・提案する。",
+      "files": [
+        "evals/files/small-project/src/user_service.py",
+        "evals/files/small-project/src/order_processor.py",
+        "evals/files/small-project/tests/test_user_service.py",
+        "evals/files/small-project/tests/test_order_processor.py"
+      ],
+      "expectations": [
+        "並列機能がなくても調査を完了する",
+        "複雑性と重複について現行ソースに裏付けられた候補を提示する",
+        "不存在のツールを呼ぼうとして停止しない",
+        "ソースを変更しない"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "evals/files/small-project/ の候補を調査して下さい。サブエージェントが使える場合は複雑性・重複の観点を分担してください。両担当が同じ関数を候補として挙げても根拠を失わずにまとめて下さい。",
+      "expected_output": "探索担当の結果を集約してから候補を保存し、同一対象の重複と採番衝突を防ぐ。",
+      "files": [
+        "evals/files/small-project/src/user_service.py",
+        "evals/files/small-project/src/order_processor.py",
+        "evals/files/small-project/tests/test_user_service.py",
+        "evals/files/small-project/tests/test_order_processor.py"
+      ],
+      "expectations": [
+        "共有候補の採番と書込みを集約担当に限定する",
+        "同一対象の候補には複数観点の根拠が保持される",
+        "各候補は固有の番号を持ち、別候補への上書きがない",
+        "利用可能な並列機能の上限を守り、機能がなければ逐次調査で完了する"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "evals/files/tested-project/refactoring-discoveries/ にある候補001を実施してください。対象プロジェクトは evals/files/tested-project/ です。",
+      "expected_output": "既存候補を現状照合し、Gate A/Bを確認して重複を減らす。テストで振る舞い保持を検証してから該当候補ファイルを削除し、完了内容をサマリで報告する。",
+      "files": [
+        "evals/files/tested-project/src/labels.py",
+        "evals/files/tested-project/tests/test_labels.py",
+        "evals/files/tested-project/refactoring-discoveries/001-format_label.md"
+      ],
+      "expectations": [
+        "指定候補を現行コードとテストに照合し、再度の選択確認や全面探索を行わない",
+        "変更前後に自動テストを実行し成功する",
+        "None・空文字・空白の正規化・大文字小文字の両経路を確認する",
+        "format_labelの重複を減らし、出力を保持する",
+        "検証成功後に既存の候補001のMDを削除し、完了内容とテスト結果をサマリで報告する"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "evals/files/stale-discoveries/ の候補を確認し、今も必要なものだけ実施してください。対象は evals/files/tested-project/ です。",
+      "expected_output": "削除済みシンボルを現状照合で対象外とし、その理由を候補に記録する。既存候補だけを扱う依頼を守る。",
+      "files": [
+        "evals/files/stale-discoveries/001-legacy_format_label.md",
+        "evals/files/tested-project/src/labels.py",
+        "evals/files/tested-project/tests/test_labels.py"
+      ],
+      "expectations": [
+        "旧シンボルlegacy_format_labelが存在しないことを実コードで確認する",
+        "候補を対象外に更新し、理由を記録する",
+        "同じ行付近の別シンボルを旧候補として変更しない",
+        "ソースを変更せず、現状では実施対象がないことを報告する"
       ]
     }
   ]
