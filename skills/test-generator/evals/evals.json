@@ -1,0 +1,134 @@
+{
+  "skill_name": "test-generator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "evals/files/minimal-project/ をリポジトリ外の一時ディレクトリへコピーし、コピーを作業対象にして下さい。元の fixture は編集しないで下さい。このプロジェクトのテスト候補だけを探して下さい。ソース・設定・文書・テストは編集しないで下さい。",
+      "scenario": "候補探索のみ",
+      "files": [
+        "evals/files/minimal-project/AGENTS.md",
+        "evals/files/minimal-project/reports/previous-coverage.json",
+        "evals/files/minimal-project/src/labels.py",
+        "evals/files/minimal-project/src/orders.py",
+        "evals/files/minimal-project/tests/test_labels.py",
+        "evals/files/minimal-project/tests/test_orders.py"
+      ],
+      "expectations": [
+        "既存コマンドで調査し、ソース・設定・文書・テストを変更しない",
+        "注文のゼロ・不正入力の拒否や表示名の None・空白など、公開仕様上の不足を根拠付きで挙げる",
+        "新しいコマンドや手順書を作らず、実行できない項目は限界を示す"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "evals/files/minimal-project/ をリポジトリ外の一時ディレクトリへコピーし、コピーを作業対象にして下さい。元の fixture は編集しないで下さい。src/labels.py のテストを追加して下さい。隔離コピーには Git の変更がありません。",
+      "scenario": "指定対象優先",
+      "files": [
+        "evals/files/minimal-project/AGENTS.md",
+        "evals/files/minimal-project/reports/previous-coverage.json",
+        "evals/files/minimal-project/src/labels.py",
+        "evals/files/minimal-project/src/orders.py",
+        "evals/files/minimal-project/tests/test_labels.py",
+        "evals/files/minimal-project/tests/test_orders.py"
+      ],
+      "expectations": [
+        "Git 差分がなくても指定された display_name のテストを追加する",
+        "None・空白だけの入力の戻り値を公開仕様に従って検証する",
+        "無関係な orders のテストや製品コードに対象を広げない",
+        "追加したテストを実行し、今回の結果を報告する"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "evals/files/minimal-project/ をリポジトリ外の一時ディレクトリへコピーし、コピーを作業対象にして下さい。元の fixture は編集しないで下さい。リポジトリ全体のカバレッジ改善候補だけを調査して下さい。隔離コピーには Git の変更がありません。",
+      "scenario": "全体探索",
+      "files": [
+        "evals/files/minimal-project/AGENTS.md",
+        "evals/files/minimal-project/reports/previous-coverage.json",
+        "evals/files/minimal-project/src/labels.py",
+        "evals/files/minimal-project/src/orders.py",
+        "evals/files/minimal-project/tests/test_labels.py",
+        "evals/files/minimal-project/tests/test_orders.py"
+      ],
+      "expectations": [
+        "変更なしを理由に終了せず orders と labels の両方を調査する",
+        "過去の 100% レポートだけで不足なしと結論しない",
+        "編集せず、新しい行カバレッジと振る舞いの不足を報告する",
+        "未計測の分岐カバレッジを測定済みとしない"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "evals/files/minimal-project/ をリポジトリ外の一時ディレクトリへコピーし、コピーを作業対象にして下さい。元の fixture は編集しないで下さい。変更分のテスト候補だけを探して下さい。比較元は release。模擬 Git 結果: release と HEAD の共通祖先からのコミット済み差分は src/orders.py、ステージ済み差分は tests/test_orders.py、未ステージ差分は src/labels.py、未追跡は src/new_label.py。new_label.py の内容は labels.py と同じです。upstream は作業ブランチ自身です。実際の Git 設定は変更せず、この結果を調査入力として使って下さい。",
+      "scenario": "変更範囲の集約",
+      "files": [
+        "evals/files/minimal-project/AGENTS.md",
+        "evals/files/minimal-project/reports/previous-coverage.json",
+        "evals/files/minimal-project/src/labels.py",
+        "evals/files/minimal-project/src/orders.py",
+        "evals/files/minimal-project/tests/test_labels.py",
+        "evals/files/minimal-project/tests/test_orders.py"
+      ],
+      "expectations": [
+        "明示比較元 release を採用し、作業ブランチ upstream に置き換えない",
+        "コミット済み・ステージ済み・未ステージ・未追跡を対象候補に含め、テストと製品コードを区別する",
+        "調査のみなのでテスト追加や設定変更をしない"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "evals/files/minimal-project/ をリポジトリ外の一時ディレクトリへコピーし、コピーを作業対象にして下さい。元の fixture は編集しないで下さい。テストとカバレッジの検証結果を報告して下さい。模擬実行結果: 今回の測定コマンドは終了コード 1 で失敗し、新しい出力先にレポートを生成しませんでした。過去の reports/previous-coverage.json だけが残っています。今回は再実行や編集をせず、この結果を扱って下さい。",
+      "scenario": "古いレポートと実行失敗",
+      "files": [
+        "evals/files/minimal-project/AGENTS.md",
+        "evals/files/minimal-project/reports/previous-coverage.json",
+        "evals/files/minimal-project/src/labels.py",
+        "evals/files/minimal-project/src/orders.py",
+        "evals/files/minimal-project/tests/test_labels.py",
+        "evals/files/minimal-project/tests/test_orders.py"
+      ],
+      "expectations": [
+        "今回の検証を失敗・カバレッジ未計測として報告する",
+        "過去レポートの 100% を今回の成功や改善の証拠にしない",
+        "レポート未生成だけで依存不足と断定しない"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "evals/files/minimal-project/ をリポジトリ外の一時ディレクトリへコピーし、コピーを作業対象にして下さい。元の fixture は編集しないで下さい。src/orders.py のカバレッジを改善して下さい。公開仕様を検証するテストを追加し、残った未カバー行の理由も説明して下さい。",
+      "scenario": "公開仕様と到達不能行",
+      "files": [
+        "evals/files/minimal-project/AGENTS.md",
+        "evals/files/minimal-project/reports/previous-coverage.json",
+        "evals/files/minimal-project/src/labels.py",
+        "evals/files/minimal-project/src/orders.py",
+        "evals/files/minimal-project/tests/test_labels.py",
+        "evals/files/minimal-project/tests/test_orders.py"
+      ],
+      "expectations": [
+        "ゼロ・負数・bool・非整数の公開 API の動作を意味のあるアサーションで検証する",
+        "_positive_total の防御分岐を通すためだけに内部関数を直接呼び出したり内部状態を偽装したりしない",
+        "製品コード・測定対象・除外設定を変えて率を上げない",
+        "同じ条件で変更前後のテストと行カバレッジを測定し、到達不能な防御処理と未計測の分岐率を区別して報告する"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "evals/files/minimal-project/ をリポジトリ外の一時ディレクトリへコピーし、コピーを作業対象にして下さい。元の fixture は編集しないで下さい。変更分のテスト候補だけを探して下さい。比較元は release。模擬 Git 結果: release は存在せず merge-base が失敗。未ステージ変更は src/orders.py にあります。今回は Git 状態を変更せず、この結果から進めて下さい。",
+      "scenario": "比較元エラー",
+      "files": [
+        "evals/files/minimal-project/AGENTS.md",
+        "evals/files/minimal-project/reports/previous-coverage.json",
+        "evals/files/minimal-project/src/labels.py",
+        "evals/files/minimal-project/src/orders.py",
+        "evals/files/minimal-project/tests/test_labels.py",
+        "evals/files/minimal-project/tests/test_orders.py"
+      ],
+      "expectations": [
+        "比較元エラーを変更なしとして扱わない",
+        "確認できる作業ツリーの変更を調査し、コミット済み差分が特定できない制約を示す",
+        "存在しない比較元を main などへ黙って置き換えない"
+      ]
+    }
+  ]
+}
