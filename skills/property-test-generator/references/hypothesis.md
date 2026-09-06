@@ -1,6 +1,6 @@
 # hypothesis パターンリファレンス
 
-Python 向け。pytest と組み合わせて使用。
+Python 向け。pytest と組み合わせて使用。既存の導入版・設定を確認して適用する。
 
 ## 基本構造
 
@@ -20,18 +20,18 @@ def test_property_name(val):
 - `st.integers(min_value, max_value)` — 整数
 - `st.floats(min_value, max_value, allow_nan=False, allow_infinity=False)` — 浮動小数点
 - `st.booleans()` — boolean
-- `st.text(min_size, max_size, alphabet)` — 文字列
-- `st.binary(min_size, max_size)` — バイト列
+- `st.text(alphabet=..., min_size=0, max_size=100)` — 文字列
+- `st.binary(min_size=0, max_size=100)` — バイト列
 - `st.just(v)` — 固定値
 - `st.sampled_from([v1, v2, ...])` — 列挙値から選択
 - `st.none()` — None
 
 ### コレクション
-- `st.lists(element, min_size, max_size)` — リスト
+- `st.lists(element, min_size=0, max_size=100)` — リスト
 - `st.tuples(st1, st2, ...)` — タプル
-- `st.dictionaries(keys, values, min_size, max_size)` — 辞書
+- `st.dictionaries(keys, values, min_size=0, max_size=100)` — 辞書
 - `st.fixed_dictionaries({ key: st, ... })` — 固定キー辞書
-- `st.frozensets(element, min_size, max_size)` — frozenset
+- `st.frozensets(element, min_size=0, max_size=100)` — frozenset
 
 ### 合成
 - `st.one_of(st1, st2, ...)` — いずれか1つ
@@ -43,7 +43,7 @@ def test_property_name(val):
 - `.filter(pred)` — フィルタ（棄却率に注意）
 - `.flatmap(fn)` — 依存値生成
 
-### エッジケース強制
+### エッジケースの生成
 ```python
 st.one_of(
     st.just(0),
@@ -92,26 +92,13 @@ def test_matches_reference(data):
 
 ## 失敗時の再現
 
-```python
-# 失敗出力例:
-# Falsifying example: test_name(data=42)
-# You can reproduce this example by temporarily adding
-# @reproduce_failure('6.x', b'AAAB')
+必要に応じて `@settings(print_blob=True)` を使い、失敗時に出力された `@reproduce_failure(実際のversion, 実際のblob)` を一時的に追加して再実行する。blob は版をまたいだ互換性が保証されないので、架空の値や別バージョンの例をコピーしない。
 
-@reproduce_failure('6.100.0', b'AAAB')
-@given(data=input_strategy)
-def test_name(data):
-    ...
-```
+縮小された入力を継続して検証するには `@example(...)` や通常の回帰テストにする。通常の失敗で seed が必ず表示されるとは限らない。記録済み seed を使う場合は pytest の `--hypothesis-seed` を利用できる。
 
-## 設定
+試行回数・deadline・database は既存設定を優先する。タイムアウトや永続化を理由なく無効にしない。必須の境界は `@example` で指定する。
 
-```python
-@settings(max_examples=200, deadline=None, database=None)
-@given(...)
-def test_heavy(data):
-    ...
-```
+公式資料: [失敗の再実行](https://hypothesis.readthedocs.io/en/latest/tutorial/replaying-failures.html)、[pytest連携](https://hypothesis.readthedocs.io/en/latest/reference/integrations.html)
 
 ## ファイル命名
 

@@ -2,136 +2,64 @@
 name: property-test-generator
 license: MIT
 description: >
-  Design and generate property-based tests (PBT) for changed files in the
-  current git branch. Extracts specifications, designs properties (invariants,
-  round-trip, idempotence, metamorphic, monotonicity, reference model), builds
-  generator strategies, implements tests, and self-scores against a rubric
-  (24/30+ required). Supports fast-check (TS/JS), hypothesis (Python), and
-  proptest (Rust).
-  Use when: (1) "write property tests for my changes", (2) "add PBT",
-  (3) "property-based test", (4) after implementing pure functions, validators,
-  parsers, or formatters to verify invariants.
+  指定された関数・ファイル、または現在の変更に対して property-based tests
+  (PBT) を設計・実装・実行する。「変更分にプロパティテストを書いて」「PBTを追加して」
+  などの依頼や、純粋関数・バリデータ・パーサ・フォーマッタの不変条件の検証に使用する。
+  fast-check (TS/JS)、Hypothesis (Python)、proptest (Rust) に対応する。
 ---
 
 # Property-Based Test Generator
 
-Design and generate property-based tests for changed files, with self-scoring
-to ensure quality (24/30+ on the evaluation rubric).
+仕様に根拠のあるプロパティと入力生成戦略を設計し、既存のテスト環境で実行する。
+テスト件数や自己採点を品質の代替にしない。
 
-## Constraints
+## 対象の特定
 
-- Black-box only — never depend on internal implementation details.
-- No trivial properties (type-check-only, no-exception-only are forbidden).
-- Minimize `assume`/`filter` — express constraints in generators instead.
-- Always ensure seed + minimal counterexample reproducibility.
+ユーザーが指定した関数・ファイル・範囲・比較元を最優先する。指定ファイルは変更の有無にかかわらず対象にし、無関係な変更まで対象を広げない。
 
-## Workflow
+「現在の変更」の場合はリポジトリのルートから以下を確認し、コミット済み差分、ステージ済み、未ステージ、未追跡の候補を重複なくまとめる。
 
-1. **Detect changed files** — identify PBT candidates from git diff
-2. **Extract specifications** — read each file, document inputs/outputs/constraints
-3. **Design properties** — minimum 5 per function, following the property type hierarchy
-4. **Build generators** — express input domains with edge cases and good shrinking
-5. **Implement tests** — write test files in the project's framework
-6. **Self-score** — evaluate against rubric, improve if below 24/30
-7. **Report** — present results to user
+- 比較元はユーザー指定、PR の base、設定されたリモートの既定ブランチの順で確認する。ローカルで `git symbolic-ref --quiet refs/remotes/<remote>/HEAD` などから判定し、`main` や `origin` を固定しない。upstream は同じ作業ブランチの場合があるので自動的に比較元とみなさない。
+- 比較元を特定できたら `git merge-base <base> HEAD` を求め、`git diff --name-status -z --diff-filter=ACMR <merge-base> HEAD` でコミット済み候補を取得する。
+- `git diff --name-status -z --diff-filter=ACMR --cached`、`git diff --name-status -z --diff-filter=ACMR`、`git ls-files --others --exclude-standard -z` を併せて読む。空白・改行を含むパスに対応するため NUL 区切りで扱い、rename/copy は変更後のパスを使う。
+- 集約した候補は現在の作業ツリーで確認し、削除済みのファイルを除外する。まだ HEAD のないリポジトリでもステージ済み・未追跡ファイルを調べる。
+- 比較元が不明なら推測せず、確定できる作業ツリーの範囲を先に調査する。コミット済み範囲の特定が必要なら不足情報を尋ね、比較できなかった範囲を明記する。
 
-## Step 1 — Detect Changed Files
+純粋関数、バリデータ、パーサ・シリアライザ、フォーマッタ、状態遷移、整列・変換処理を優先する。単純な getter や UI 描画のみなど、PBT の利益が小さい対象は理由を添えて除外する。副作用がある場合は純粋な境界を探すか、既存の隔離方法で検証可能か判断する。
 
-Identify PBT candidates from the current branch diff:
+## 仕様とプロパティの設計
 
-```bash
-git diff --name-only --diff-filter=ACMR $(git merge-base main HEAD) HEAD
-```
+入力・出力・前提条件・業務ルールを、公開仕様、既存テスト、呼び出し側から抽出する。実装をそのまま期待値に写さず、曖昧な仕様は仮定として明示する。
 
-Filter to source files (`.ts`, `.tsx`, `.js`, `.jsx`, `.py`, `.rs`), excluding
-test files, config, styles, and assets.
+| プロパティ | 適用例 |
+|---|---|
+| 不変条件 | 要素保存、結果の範囲、整列順序 |
+| 往復 | `decode(encode(x))` と元の値の同値性 |
+| 冪等性 | 正規化を再適用しても結果が変わらない |
+| 入力変形との関係 | 入力順序を変えても集計結果が変わらない |
+| 単調性 | 仕様上、入力増加で出力が減らない |
+| 参照モデル | 独立した単純なモデルとの一致 |
 
-**Good PBT candidates** (prioritize these):
-- Pure functions (no side effects, deterministic)
-- Validators / type guards (`is*`, `validate*`)
-- Parsers / serializers (encode/decode, parse/stringify)
-- Formatters (data → string transformations)
-- Reducers / state transitions
-- Sorting / filtering / transformation utilities
+件数の下限は設けず、仕様上の異なる失敗を検出する少数のプロパティを選ぶ。各プロパティについて対応する要件と検出できる不具合例を説明できること。型だけの検査や例外が出ないことだけで満足せず、期待する振る舞いを検証する。往復や冪等性だけでは誤った定数出力などを見逃すため、必要に応じて意味上の条件も組み合わせる。
 
-**Poor PBT candidates** (skip these):
-- React components (use integration tests instead)
-- Side-effectful functions (API calls, file I/O)
-- Simple getters/setters with no logic
+## 生成戦略と実装
 
-## Step 2 — Extract Specifications
+既存のテストランナー、設定、依存定義・ロックファイル・導入版を先に確認する。使用する言語の資料だけを読む。
 
-For each candidate function, document:
+- TS/JS: [fast-check](references/fast-check.md)
+- Python: [Hypothesis](references/hypothesis.md)
+- Rust: [proptest](references/proptest.md)
 
-1. **Inputs** — types, ranges, constraints
-2. **Outputs** — types, expected relationships to inputs
-3. **State** — mutable state involved, if any
-4. **Requirements** — business rules as bullet points
-5. **Preconditions** — what must be true about inputs
+参照例と導入版の API が異なる場合は、ローカルの型・ドキュメント、必要に応じて該当版の公式資料で確認する。例に合わせるためだけにライブラリを更新しない。
 
-## Step 3 — Design Properties (min 5)
+入力の制約は生成器の合成で表現し、`filter` / `assume` は必要な条件に限定する。空、ゼロ、境界、重複、Unicode など仕様に関係するケースを含め、確実に実行すべき境界は明示例や通常のテストにもする。サイズ・試行回数は既存設定と計算量に合わせる。縮小を維持し、過剰な棄却やタイムアウトを隠さない。
 
-Design properties in this priority order:
+既存の配置・命名・assertion に従ってテストを書き、非同期処理を必ず待つ。通常実行で単一 seed に固定して探索範囲を狭めない。失敗時には入力、期待値、実値と、ライブラリに合った再現情報が得られるようにする。
 
-| Type | Description | When to use |
-|------|-------------|-------------|
-| Invariant | Output always satisfies a condition | Length preservation, range bounds, type guarantees |
-| Round-trip | `decode(encode(x)) === x` | Parsers, serializers, codecs |
-| Idempotence | `f(f(x)) === f(x)` | Normalizers, formatters, canonicalizers |
-| Metamorphic | Relationship between `f(x)` and `f(transform(x))` | Sort, filter, math operations |
-| Monotonicity | `x ≤ y → f(x) ≤ f(y)` | Scoring, ranking, pricing |
-| Reference model | `optimized(x) === naive(x)` | Optimized reimplementations |
+## 実行と完了条件
 
-Each property MUST include:
-- Natural-language description
-- Corresponding requirement from Step 2
-- One buggy implementation example that this property would catch
+[検証観点](references/evaluation.md) を使い、生成したテストを既存コマンドで実際に実行する。必要な型検査と関連テストも実行する。
 
-## Step 4 — Build Generators
+失敗した場合は、生成器・テストの誤りと製品の不具合を区別する。仕様に反して期待値を緩めて通さない。得られた縮小反例と seed/path、reproduction blob、永続化ファイル等を記録し、同じ環境・版で再実行して再現を確認する。製品修正が依頼範囲外なら勝手に直さず、不具合と再現テストを報告する。
 
-Determine the project language and select the library:
-- **TypeScript/JavaScript** → fast-check — see [references/fast-check.md](references/fast-check.md)
-- **Python** → hypothesis — see [references/hypothesis.md](references/hypothesis.md)
-- **Rust** → proptest — see [references/proptest.md](references/proptest.md)
-
-Generator design rules:
-- Express constraints via generator composition, not `filter`/`assume`.
-- Target filter rejection rate < 10%.
-- Explicitly include edge cases: empty, zero, boundary, max-size, duplicates, skewed distributions.
-- Prefer base Arbitrary/Strategy combinations for natural shrinking.
-- Set explicit size limits to control generation cost.
-
-## Step 5 — Implement Tests
-
-Write test files following project conventions:
-- Read existing `*.property.test.*` files for style reference.
-- Read test config and setup files.
-- File naming: `*.property.test.ts` (TS/JS), `test_*_property.py` (Python), or `#[cfg(test)] mod tests` / `tests/` (Rust). Follow project convention.
-
-Each test must include:
-1. Descriptive property name
-2. Generator definition
-3. Test body (arrange/act/assert)
-4. Seed output on failure
-5. Reproduction instructions (as comment)
-
-## Step 6 — Self-Score
-
-After implementation, evaluate against the rubric in
-[references/evaluation.md](references/evaluation.md).
-
-Score 15 criteria (A1-A5, B1-B6, C1-C4) at 0-2 points each.
-
-- **24+ points**: proceed to report.
-- **< 24 points**: identify weak criteria, improve properties/generators/diagnostics, re-score. Repeat up to 2 times.
-
-## Step 7 — Report
-
-Output in this order:
-
-1. **Requirements summary** — extracted specifications
-2. **Property list** — natural language + requirement mapping + buggy impl example
-3. **Generator strategies** — with edge case rationale
-4. **Test implementation** — actual test code (not pseudocode)
-5. **Reproduction instructions** — how to re-run with seed
-6. **Score table + improvement log** — final self-assessment
+完了報告には対象と比較元、検証する仕様、変更ファイル、実行コマンドと結果、失敗時の再現手順を簡潔に含める。対象テストと必要な関連チェックの成功をもって検証済みとする。依存・環境不足や未解決不具合で実行・成功に至らない場合は、完了を装わず未検証範囲と理由を明示する。失敗がない場合、反例や seed を捏造する必要はない。
