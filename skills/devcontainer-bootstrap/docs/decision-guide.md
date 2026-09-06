@@ -1,40 +1,19 @@
-# DevContainer Bootstrap Decision Guide
+# Dev Container の更新判断と復旧
 
-## 判定ルール
-- **node**: `package.json`
-- **python**: `pyproject.toml` または `requirements.txt`
-- **rust**: `Cargo.toml`
-- **その他/複数命中**: `unknown` とする → `--stack` を明示（自動選択しない）
+## モードの選択
+- **safe**: 独自の image/build、Dockerfile、設定を持つ既存環境を拡張する。settings/features は既存値を優先し、false や空値も保持する。既存 CI workflow は変更しない。
+- **overwrite**: JSON・Dockerfile・bootstrap スクリプトを選択スタックのテンプレートで置き換える意図がある場合に使う。既存のその他のファイルは残る。
+- **個別編集**: JSONC、複雑な起動順序、独自ビルド設定、変更済み bootstrap スクリプトなど、自動マージが扱えない構成では必要箇所を直接編集する。
 
-## safe / overwrite の使い分け
-- **safe**（推奨デフォルト）
-  - 既存 `.devcontainer/` があれば **必ず** `.devcontainer.bak-<timestamp>/` にバックアップ
-  - `devcontainer.json` は extensions/settings/features/postCreateCommand をマージ（`jq` 無しでも postCreate だけは確実に追加）
-  - 既存 Dockerfile は保持し、テンプレートは補完用途で追加のみ
-  - 既存の GitHub Actions がある場合、workflow はバックアップしてスキップ（壊さない）
-- **overwrite**
-  - テンプレートの `devcontainer.json` と `Dockerfile` をそのまま配置
-  - `.devcontainer/` はバックアップ後に置換
-  - workflow も置換（バックアップを残す）
+## バックアップとエラー
+更新を一時領域で完成させてから、`.devcontainer.bak-<一意ID>/` を作る。同一秒の再実行でもバックアップ先を分ける。overwrite で既存 CI を置き換えるときは `<workflow>.bak-<一意ID>` も作る。
 
-## バックアップ方針
-- `.devcontainer/` が存在する場合は必ず `cp -a` で `.devcontainer.bak-<timestamp>/` を作成してから更新
-- workflow 既存時は `<file>.bak-<timestamp>` を作成
-- バックアップ先をログで必ず報告
+入力・実行環境・テンプレートの検証エラーは反映前に停止する。通常の反映エラーでは元の `.devcontainer/` に戻す。CI は一時ファイルから置換し、部分書き込みを公開しない。エラー後に空の `.github/workflows/` が残る場合はある。強制終了やディスク障害に対する完全なトランザクションではないため、異常終了時はログのバックアップ先と対象の状態を確認して復旧する。
 
-## よくある罠と対処
-- **Docker Desktop / デーモン未起動**: devcontainer build で失敗する。Docker を起動して再実行。
-- **postCreate が遅い/失敗する**: ログを確認し、必要なら `postCreate.sh` 内の install コマンドを短縮。失敗しても非致命（スクリプトは `|| true`）。
-- **複数スタック混在 / go.mod のみ**: detect は `unknown` を返す。必ず `--stack` を明示して実行（例: node+rust 混在など）。
-- **VS Code 拡張が足りない**: `customizations.vscode.extensions` に追加。safe ならマージで壊れにくい。
-- **features 競合**: safe はオブジェクトマージ。上書きされたくない場合は手動で確認し、バックアップから比較する。
-- **CI が不要**: `--add-ci false`（default）。既存 workflow を守りたい場合は safe を選択。
+## postCreate の確認
+文字列と argv 配列は既存コマンドの成功後に bootstrap を実行する。オブジェクトは Dev Container の並列実行形式を維持して bootstrap の項目を追加する。既存項目との実行順が必要なら、コマンドの意図を確認して順序を明示する。
 
-## VS Code 向け設定の場所
-- 推奨設定・拡張は `customizations.vscode` に置く（参考: [Supporting tools](https://containers.dev/supporting#visual-studio-code)）。
-- stack 別テンプレートに最小設定を含めている。safe モードでは既存設定をマージし、`postCreateCommand` に `.devcontainer/postCreate.sh` を追加するだけで済む。
+旧版が追加した `.devcontainer/postCreate.sh` はユーザーのスクリプトと区別できないため自動削除しない。旧版からの移行では内容を確認し、依存インストールの二重実行があれば不要な呼び出しを個別に除去する。
 
-## Node イメージタグの選び方
-- ベースは `mcr.microsoft.com/devcontainers/typescript-node` を使用。
-- **latest は避ける**。安定タグとしてメジャー番号タグ（例: `24`）を選択する。
-- 新しい LTS に上げる場合はテンプレートの `image` をメジャー番号タグへ更新し、CI が通ることを確認する。
+## 起動検証
+Docker が利用できる場合は対象の環境でビルド・起動を確認する。Docker 未起動、イメージタグ不存在、依存インストール失敗は設定生成の成否とは別に報告する。イメージを変更するときは SKILL.md のタグ選択方針に従い、既存プロジェクトの制約とレジストリの実在タグを確認する。
