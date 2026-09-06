@@ -15,7 +15,7 @@
           "source.fixAll": "explicit",
           "source.organizeImports": "explicit"
         },
-        "files.eol": "\\n",
+        "files.eol": "\n",
         "[python]": {
           "editor.defaultFormatter": "ms-python.black-formatter"
         },

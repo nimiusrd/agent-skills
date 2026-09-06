@@ -23,4 +23,6 @@ bash skills/devcontainer-bootstrap/scripts/apply_devcontainer.sh --stack node --
 bash skills/devcontainer-bootstrap/scripts/apply_devcontainer.sh --stack python --mode safe
 ```
 
-詳細な判定ルールや safe/overwrite の違いは `docs/decision-guide.md` を参照。
+実行には Python 3.8 以上が必要です。新規作成・overwrite ではプロジェクトのバージョン制約に合うイメージタグを確認し、`--image-tag` で指定できます。既存 JSONC は自動更新せず停止します。
+
+オプションと制約は [SKILL.md](SKILL.md)、更新・復旧の判断は [docs/decision-guide.md](docs/decision-guide.md) を参照。
