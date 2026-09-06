@@ -1,6 +1,6 @@
 # proptest パターンリファレンス
 
-Rust 向け。`cargo test` で実行。
+Rust 向け。`cargo test` で実行。既存の Cargo.toml と Cargo.lock の版を確認し、導入版の API を優先する。
 
 ## セットアップ
 
@@ -69,7 +69,7 @@ fn record_strategy() -> impl Strategy<Value = Record> {
 }
 ```
 
-### エッジケース強制
+### エッジケースの生成
 ```rust
 prop_oneof![
     Just(0i32),
@@ -143,19 +143,11 @@ proptest! {
 
 ## 失敗時の再現
 
-```rust
-// 失敗出力例:
-// thread 'test' panicked at 'Test failed: minimal failing input: val = 42'
-// proptest persistence file: proptest-regressions/module_name.txt
+既定の failure persistence が有効なら、失敗時に生成された `proptest-regressions` 等の保存先を確認する。同じ生成戦略・版で対象の `cargo test` を再実行し、保存された失敗ケースが再現することを確認する。実際の保存先、縮小反例、コマンド、版を記録する。
 
-// proptest は自動で proptest-regressions/ に失敗ケースを保存する。
-// 再実行時に自動で回帰テストとして実行される。
-// 手動で設定ファイルから seed を指定することも可能：
+永続化ファイルは seed を保持するため、生成戦略変更後も同じ入力になるとは限らない。長期保持すべき具体的な反例は通常の回帰テストにもする。回帰ファイルを共有する場合はプロジェクトの方針に従う。設定は既存の `ProptestConfig` で行い、根拠のない設定ファイル形式を作らない。
 
-// proptest.toml (プロジェクトルート)
-// [default]
-// cases = 256
-```
+公式資料: [Failure Persistence](https://proptest-rs.github.io/proptest/proptest/failure-persistence.html)
 
 ## 設定
 
