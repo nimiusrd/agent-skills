@@ -1,0 +1,13 @@
+{
+  "name": "dynamic-plugin-fixture",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "npm@11.19.0",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "fixture-plugin-upper": "file:vendor/plugin-upper",
+    "fixture-unused": "file:vendor/unused"
+  }
+}

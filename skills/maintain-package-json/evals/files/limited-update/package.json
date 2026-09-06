@@ -1,0 +1,13 @@
+{
+  "name": "limited-update-fixture",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "npm@11.19.0",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "fixture-formatter": "file:vendor/formatter-v1",
+    "fixture-helper": "file:vendor/helper-v1"
+  }
+}

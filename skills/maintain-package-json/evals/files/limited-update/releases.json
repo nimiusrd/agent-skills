@@ -1,0 +1,16 @@
+{
+  "fixture_notice": "評価用の架空パッケージ。ここにあるローカル配布物だけを使い、実レジストリへ問い合わせない。",
+  "fixture-formatter": {
+    "current": "1.0.0",
+    "available": "1.0.1",
+    "source": "vendor/formatter-v2",
+    "changes": "前後の空白除去を追加。Node >=18。",
+    "maintenance": "ローカル配布物だけでは実際の保守状況は判定できない"
+  },
+  "fixture-helper": {
+    "current": "1.0.0",
+    "available": "2.0.0",
+    "source": "vendor/helper-v2",
+    "changes": "括弧形式を角括弧から波括弧へ変更する破壊的更新。"
+  }
+}
