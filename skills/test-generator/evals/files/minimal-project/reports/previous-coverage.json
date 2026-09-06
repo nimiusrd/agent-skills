@@ -1,0 +1,9 @@
+{
+  "run_id": "historical-run",
+  "commit": "old-snapshot",
+  "test_exit_code": 0,
+  "files": {
+    "src/orders.py": {"line_percent": 100},
+    "src/labels.py": {"line_percent": 100}
+  }
+}
