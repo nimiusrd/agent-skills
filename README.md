@@ -82,7 +82,7 @@ gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 ```bash
 cd /path/to/agent-skills
 gh skill publish --dry-run
-python3 -m pip install --quiet check-jsonschema
+python3 -m pip install --quiet -r requirements-plugin-validate.txt
 python3 -m check_jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
 ```
 
@@ -142,7 +142,7 @@ gh skill preview nimiusrd/agent-skills commit-and-pr
 
 ```bash
 gh skill publish --dry-run
-python3 -m pip install --quiet check-jsonschema
+python3 -m pip install --quiet -r requirements-plugin-validate.txt
 python3 -m check_jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
 ```
 
