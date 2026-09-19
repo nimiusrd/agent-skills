@@ -1,0 +1,21 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "agent-skills",
+  "version": "1.0.0",
+  "description": "パッケージ整理、テスト生成、リファクタリング、Dev Container 導入、PR 作成・再レビューなど、日常的な開発作業向けの Agent Skills コレクション。",
+  "author": {
+    "name": "nimiusrd",
+    "url": "https://github.com/nimiusrd"
+  },
+  "homepage": "https://github.com/nimiusrd/agent-skills",
+  "repository": "https://github.com/nimiusrd/agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "package-json",
+    "testing",
+    "refactoring",
+    "pull-request",
+    "devcontainer"
+  ]
+}
