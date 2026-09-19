@@ -1,15 +1,26 @@
 # agent-skills
 
-AI コーディングエージェントの作業を再利用可能な手順としてまとめた、Agent Skills のコレクションです。
+AI コーディングエージェントの作業を再利用可能な手順としてまとめた、Agent Skills のコレクションです。このリポジトリは [Agent Plugins 1.0.0](https://agent-plugins.org/specification) に準拠したプラグインでもあり、対応クライアントからまとめてインストールできます。
 
 パッケージ整理、テスト生成、リファクタリング、Dev Container の導入、Pull Request の作成・再レビューまで、日常的な開発作業に使えるスキルを収録しています。
 
 ## クイックスタート
 
-### 前提条件
+### プラグインとしてまとめて入れる
 
-- GitHub CLI 2.90.0 以降
-- GitHub CLI で認証済みであること（`gh auth login`）
+収録スキルをまとめて使う場合は、Agent Plugin 対応クライアントからこのリポジトリをインストールします。
+
+```bash
+# GitHub Copilot CLI
+copilot plugin install nimiusrd/agent-skills
+```
+
+- VS Code: Command Palette で `Chat: Install Plugin From Source` を実行し、`https://github.com/nimiusrd/agent-skills` を指定します。
+- Cursor: Customize からインストールするか、ローカル検証では `~/.cursor/plugins/local/agent-skills` にこのリポジトリを配置します。
+
+### 特定のスキルだけを入れる
+
+個別スキルのインストールには GitHub CLI 2.90.0 以降が必要です。GitHub CLI で認証済みであること（`gh auth login`）を確認してください。
 
 必要なスキルだけを、現在のプロジェクトのプロジェクトスコープへインストールします。コマンドは対象プロジェクトのルートで実行してください。
 非対話環境では利用中のエージェントを自動判定せず、CLIの既定のインストール先が使われる場合があります。インストール後に配置先を確認し、意図したエージェントから利用できることを確認してください。
@@ -40,6 +51,16 @@ gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 
 ## インストール方法
 
+### プラグインとしてまとめてインストールする
+
+Agent Plugin 対応クライアントは、ルートの `plugin.json` を読み、`skills/` 直下の各スキルを発見します。
+
+```bash
+copilot plugin install nimiusrd/agent-skills
+```
+
+VS Code では `Chat: Install Plugin From Source`、Cursor では Customize または `~/.cursor/plugins/local/agent-skills` への配置を使います。
+
 ### 特定のスキルだけをインストールする
 
 リポジトリ名の後にスキル名を指定します。
@@ -54,13 +75,15 @@ gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 
 作成中のスキルは、GitHub に公開する前に `--from-local` で対象プロジェクトへインストールして動作を確認できます。ローカルインストールではファイルがコピーされるため、`SKILL.md` を修正した場合は再インストールしてください。
 
-### 1. スキルの仕様を検証する
+### 1. スキルとプラグインの仕様を検証する
 
-スキルのソースリポジトリで、Agent Skills 仕様への適合性を確認します。
+スキルのソースリポジトリで、Agent Skills 仕様と Agent Plugins マニフェストへの適合性を確認します。
 
 ```bash
 cd /path/to/agent-skills
 gh skill publish --dry-run
+python3 -m pip install --quiet jsonschema
+python3 scripts/validate_plugin.py
 ```
 
 ### 2. 作成中のスキルを対象プロジェクトへ入れる
@@ -113,12 +136,14 @@ gh skill preview nimiusrd/agent-skills commit-and-pr
 
 ## 開発
 
-各スキルは `skills/<skill-name>/SKILL.md` を起点に構成されています。必要に応じて、スクリプト、テンプレート、リファレンス、評価ケースを同じディレクトリ内へ配置します。
+各スキルは `skills/<skill-name>/SKILL.md` を起点に構成されています。必要に応じて、スクリプト、テンプレート、リファレンス、評価ケースを同じディレクトリ内へ配置します。プラグイン全体のメタデータはルートの `plugin.json` にあります。
 
-変更後は、Agent Skills 仕様への適合性を検証してください。
+変更後は、Agent Skills 仕様と Agent Plugins マニフェストへの適合性を検証してください。
 
 ```bash
 gh skill publish --dry-run
+python3 -m pip install --quiet jsonschema
+python3 scripts/validate_plugin.py
 ```
 
 この検証は、`main` ブランチへの push と Pull Request でも GitHub Actions により実行されます。
