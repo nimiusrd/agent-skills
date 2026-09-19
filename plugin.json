@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "agent-skills",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "パッケージ整理、テスト生成、リファクタリング、Dev Container 導入、PR 作成・再レビューなど、日常的な開発作業向けの Agent Skills コレクション。",
   "author": {
     "name": "nimiusrd",
