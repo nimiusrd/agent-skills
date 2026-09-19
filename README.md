@@ -83,7 +83,7 @@ gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 cd /path/to/agent-skills
 gh skill publish --dry-run
 python3 -m pip install --quiet check-jsonschema
-check-jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
+python3 -m check_jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
 ```
 
 ### 2. 作成中のスキルを対象プロジェクトへ入れる
@@ -143,7 +143,7 @@ gh skill preview nimiusrd/agent-skills commit-and-pr
 ```bash
 gh skill publish --dry-run
 python3 -m pip install --quiet check-jsonschema
-check-jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
+python3 -m check_jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
 ```
 
 この検証は、`main` ブランチへの push と Pull Request でも GitHub Actions により実行されます。
