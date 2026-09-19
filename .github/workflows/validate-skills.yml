@@ -23,8 +23,8 @@ jobs:
 
       - name: Validate plugin manifest
         run: |
-          python3 -m pip install --quiet jsonschema
-          python3 scripts/validate_plugin.py
+          python3 -m pip install --quiet check-jsonschema
+          check-jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
 
       - name: Check GitHub CLI skill support
         run: |
