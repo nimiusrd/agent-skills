@@ -11,6 +11,10 @@ AI コーディングエージェントの作業を再利用可能な手順と�
 収録スキルをまとめて使う場合は、Agent Plugin 対応クライアントからこのリポジトリをインストールします。
 
 ```bash
+# Codex CLI
+codex plugin marketplace add nimiusrd/agent-skills
+codex plugin add agent-skills@nimiusrd-plugins
+
 # GitHub Copilot CLI
 copilot plugin install nimiusrd/agent-skills
 ```
@@ -60,6 +64,26 @@ copilot plugin install nimiusrd/agent-skills
 ```
 
 VS Code では `Chat: Install Plugin From Source`、Cursor では Customize または `~/.cursor/plugins/local/agent-skills` への配置を使います。
+
+#### Codex
+
+Codex では、マーケットプレイスを登録してからプラグインをインストールします。
+
+```bash
+codex plugin marketplace add nimiusrd/agent-skills
+codex plugin add agent-skills@nimiusrd-plugins
+```
+
+ローカルの変更を試す場合は、GitHub リポジトリの代わりに、このリポジトリのルートディレクトリを指定します。
+
+```bash
+codex plugin marketplace add /path/to/agent-skills
+codex plugin add agent-skills@nimiusrd-plugins
+```
+
+インストール後は Codex アプリを再起動し、新しいタスクで収録スキルを使用してください。
+
+マーケットプレイス定義は [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json) にあります。`source.path` はリポジトリのルートを基準に解決され、`./` にある `plugin.json` と `skills/` を参照します。詳細は [OpenAI のプラグイン構成ドキュメント](https://developers.openai.com/plugins/build/plugins#marketplace-metadata) を参照してください。
 
 ### 特定のスキルだけをインストールする
 
