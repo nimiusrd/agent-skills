@@ -1,0 +1,11 @@
+{
+  "name": "fixture-addon",
+  "version": "1.0.0",
+  "main": "index.cjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "fixture-engine": "^1.0.0"
+  }
+}

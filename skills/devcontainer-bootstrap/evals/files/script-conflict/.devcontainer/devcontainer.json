@@ -1,0 +1,4 @@
+{
+  "image": "example.invalid/team/node:22",
+  "postCreateCommand": "sh .devcontainer/bootstrap-postCreate.sh"
+}

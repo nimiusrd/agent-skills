@@ -1,0 +1,2 @@
+steps:
+  - run: npm run build:copy -- "a b" "x;y"

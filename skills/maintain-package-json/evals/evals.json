@@ -79,6 +79,50 @@
         "依存追加・別ロックファイルの生成・全依存の最新化を行わない",
         "更新前後バージョンと実行した検証を報告し、未実行検証を成功扱いしない"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "evals/files/lifecycle-scripts/ をリポジトリ外の一時ディレクトリへコピーし、そのコピーを対象にしてください。元のfixtureは編集しないでください。package.json のスクリプトを整理してください。CIが使う入口・引数・成功失敗時の動作を保持してください。依存追加とネットワークは不要です。適切な整理がなければ根拠を示して維持して構いません。",
+      "expected_output": "単純なラッパーも呼び出し元とライフサイクルを確認し、順序・引数・失敗の伝達を保持する。",
+      "files": [
+        "evals/files/lifecycle-scripts/ci.yml",
+        "evals/files/lifecycle-scripts/package.json",
+        "evals/files/lifecycle-scripts/phase.cjs",
+        "evals/files/lifecycle-scripts/test.cjs"
+      ],
+      "expectations": [
+        "ci.ymlのbuild:copy利用とprebuild/postbuildの暗黙実行を確認する",
+        "npm testが成功し、両入口の成功時のpre→build→postが各1回である",
+        "pre失敗時はbuild/post、build失敗時はpostを実行せず非ゼロ終了する。post失敗時も両入口が非ゼロ終了する",
+        "空白・セミコロンを含む引数がbuildにそのまま届く",
+        "テストを弱めず、CIが使うbuild:copyとbuildの入口を保持し、変更不要なら根拠を示す"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "evals/files/compatibility/ をリポジトリ外の一時ディレクトリへコピーし、そのコピーを対象にしてください。元のfixtureは編集しないでください。提供された候補から、現在のサポート環境と構成のまま適用できる依存更新を行ってください。ネットワークは使わず、releases.json と vendor/ の架空配布物だけを利用してください。",
+      "expected_output": "実行環境とpeer制約を満たす1.0.1へ限定更新し、2.0.0を見送る。",
+      "files": [
+        "evals/files/compatibility/package-lock.json",
+        "evals/files/compatibility/package.json",
+        "evals/files/compatibility/releases.json",
+        "evals/files/compatibility/test.cjs",
+        "evals/files/compatibility/vendor/addon-v1/index.cjs",
+        "evals/files/compatibility/vendor/addon-v1/package.json",
+        "evals/files/compatibility/vendor/engine-v1-patch/index.cjs",
+        "evals/files/compatibility/vendor/engine-v1-patch/package.json",
+        "evals/files/compatibility/vendor/engine-v1/index.cjs",
+        "evals/files/compatibility/vendor/engine-v1/package.json",
+        "evals/files/compatibility/vendor/engine-v2/index.cjs",
+        "evals/files/compatibility/vendor/engine-v2/package.json"
+      ],
+      "expectations": [
+        "fixture-engineをfile:vendor/engine-v1-patchの1.0.1へ更新しロックを整合させる",
+        "2.0.0はNode >=24とaddonのpeer ^1.0.0により現構成で採用できないと説明する",
+        "ホストのNode版やテスト成功だけを根拠にサポート範囲を引き上げず、enginesとaddonを保持する",
+        "--force・--legacy-peer-deps・overridesで不整合を隠さず、npm ci --offline相当とnpm testが成功する",
+        "vendor・既存テスト・releases.jsonを変更せず、更新前後と保留理由を報告する"
+      ]
     }
   ]
 }

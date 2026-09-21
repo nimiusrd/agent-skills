@@ -1,0 +1,53 @@
+{
+  "skill_name": "devcontainer-bootstrap",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "evals/files/jsonc/ をリポジトリ外の一時ディレクトリへコピーし、そのコピーを対象にしてください。元のfixtureは編集しないでください。既存のDev ContainerにGitHub CLIのfeatureだけを追加してください。コメントと既存設定を保持してください。ネットワークとDocker起動は不要です。",
+      "expected_output": "JSONCを壊さず最小限の直接編集でfeatureを追加する。",
+      "files": [
+        "evals/files/jsonc/.devcontainer/devcontainer.json",
+        "evals/files/jsonc/package.json"
+      ],
+      "expectations": [
+        "コメントと末尾カンマを含むJSONCを認識し、strict JSONへ無断変換しない",
+        "ghcr.io/devcontainers/features/github-cli:1を1件だけ追加する",
+        "既存image・git設定・formatOnSave=false・postCreateCommand配列を保持する",
+        "bootstrapや無関係なeditor設定を追加せず、未実施のDocker検証を成功扱いしない"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "evals/files/script-conflict/ をリポジトリ外の一時ディレクトリへコピーし、そのコピーを対象にしてください。元のfixtureは編集しないでください。既存のDev Containerに開発ツールを含む共通セットアップを安全に導入してください。既存の独自スクリプトは保持してください。ネットワークとDocker起動は不要です。",
+      "expected_output": "独自bootstrapと競合する場合は上書きせず、未完了箇所と対応案を報告する。",
+      "files": [
+        "evals/files/script-conflict/.devcontainer/bootstrap-postCreate.sh",
+        "evals/files/script-conflict/.devcontainer/devcontainer.json",
+        "evals/files/script-conflict/package.json"
+      ],
+      "expectations": [
+        "bootstrap-postCreate.shの既存内容を保持し、退避だけしてテンプレートへ置換しない",
+        "衝突で停止する場合、既存devcontainer.jsonとスクリプトを変更しない",
+        "別名で安全に共存させる場合、独自処理の実行意味を保持し衝突を避ける",
+        "実施できた範囲と未完了箇所を区別し、失敗を成功として報告しない"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "evals/files/python-version/ をリポジトリ外の一時ディレクトリへコピーし、そのコピーを対象にしてください。元のfixtureは編集しないでください。このPythonプロジェクトにDev Containerを新規導入してください。バージョンはプロジェクトの制約に合わせ、available-images.jsonを確認済みタグ一覧として使ってください。CI追加・ネットワーク・Docker起動は不要です。",
+      "expected_output": "プロジェクト指定のPython 3.11をimageとDockerfileで一貫して採用する。",
+      "files": [
+        "evals/files/python-version/.python-version",
+        "evals/files/python-version/available-images.json",
+        "evals/files/python-version/pyproject.toml"
+      ],
+      "expectations": [
+        ".python-versionとrequires-pythonの共通制約に合う3.11を選ぶ",
+        "生成したdevcontainer.jsonのimageまたはbuildで参照するDockerfileがPython 3.11を使用する",
+        "未使用のDockerfileも生成するならそのFROMを同じ3.11にそろえ、latestや既定3.14を使わない",
+        "バージョン指定ファイルを変更せずCIを追加しない",
+        "設定生成とDockerビルド・起動の未実施を区別して報告する"
+      ]
+    }
+  ]
+}

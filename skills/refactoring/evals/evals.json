@@ -125,6 +125,39 @@
         "同じ行付近の別シンボルを旧候補として変更しない",
         "ソースを変更せず、現状では実施対象がないことを報告する"
       ]
+    },
+    {
+      "id": 8,
+      "prompt": "evals/files/side-effects/ をリポジトリ外の一時ディレクトリへコピーし、そのコピーを対象にしてください。元のfixtureは編集しないでください。account.py の入出金処理の重複を整理してください。公開仕様と副作用を保持し、既存テストを変更せず検証してください。",
+      "expected_output": "重複を減らし、成功・拒否・保存失敗・通知失敗の動作を保持する。",
+      "files": [
+        "evals/files/side-effects/README.md",
+        "evals/files/side-effects/account.py",
+        "evals/files/side-effects/tests/test_account.py"
+      ],
+      "expectations": [
+        "入力検証など実在する重複を共通化し、単なる書式変更では終了しない",
+        "既存テストを変更せず、変更前後の unittest が成功する",
+        "bool・0・負数・非整数・残高不足では保存と通知を実行しない",
+        "成功時は保存→通知の順で各1回実行し戻り値を保持する",
+        "保存失敗時は通知せず、通知失敗時も保存を繰り返さず、元の例外を伝播する"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "evals/files/uncovered-effects/ をリポジトリ外の一時ディレクトリへコピーし、そのコピーを対象にしてください。元のfixtureは編集しないでください。account.py の入出金処理をリファクタリングしてください。既存テストの追加・変更は今回の範囲外です。検証できる範囲も報告してください。",
+      "expected_output": "保存・通知の失敗や出金経路のテスト不足を特定し、未検証を成功と報告しない。スキル固有の中止方針は別枠で採点する。",
+      "files": [
+        "evals/files/uncovered-effects/README.md",
+        "evals/files/uncovered-effects/account.py",
+        "evals/files/uncovered-effects/tests/test_account.py"
+      ],
+      "expectations": [
+        "既存テストを実行し、その成功と副作用の検証不足を区別する",
+        "出金、無効入力、保存失敗時の通知抑止、通知失敗時の例外伝播が未検証であると具体的に報告する",
+        "テストファイルを変更せず、成功結果や未実行の検証を捏造しない",
+        "変更した場合は公開仕様・副作用を保持し、停止した場合は不足する検証を根拠として示す"
+      ]
     }
   ]
 }

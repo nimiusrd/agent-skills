@@ -1,0 +1,41 @@
+{
+  "skill_name": "property-test-generator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "evals/files/normalization/ をリポジトリ外の一時ディレクトリへコピーし、そのコピーを対象にしてください。元のfixtureは編集しないでください。normalize_words の property-based tests を tests/test_properties_normalizer.py に Hypothesis と unittest で追加し、実行してください。公開仕様に基づいて検証し、製品コードと既存テストは変更しないでください。Hypothesis が使えなければ未実行と明記してください。",
+      "expected_output": "冪等性や空白整形だけでなく、単語の内容・大小文字・順序を検証する生成テストを追加する。",
+      "files": [
+        "evals/files/normalization/README.md",
+        "evals/files/normalization/normalizer.py",
+        "evals/files/normalization/requirements.txt",
+        "evals/files/normalization/tests/test_normalizer.py"
+      ],
+      "expectations": [
+        "新しいテストでHypothesisの生成入力を使い、製品コード・既存テストを変更しない",
+        "空文字・空白のみ・Unicode空白・複数単語・大小文字混在を扱い、実装のsplit/joinをそのまま期待値に複製しない",
+        "正常実装で既存テストと新規テストが成功する",
+        "追加した生成テストだけでも、定数出力・小文字化・順序逆転・ASCII空白のみを扱う誤実装を検出する",
+        "過剰なfilter/assumeやhealth check無効化に頼らず、実行結果と対象仕様を報告する"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "evals/files/ordered-unique/ をリポジトリ外の一時ディレクトリへコピーし、そのコピーを対象にしてください。元のfixtureは編集しないでください。unique_in_order の公開仕様を検証する property-based tests を Hypothesis と unittest で追加して実行してください。製品コードと既存テストの変更は範囲外です。失敗が見つかったら反例と再実行結果を報告してください。Hypothesis が使えなければ未実行と明記してください。",
+      "expected_output": "初出順に反する不具合を検出し、縮小された反例を保存して同じ不具合を再現する。",
+      "files": [
+        "evals/files/ordered-unique/README.md",
+        "evals/files/ordered-unique/requirements.txt",
+        "evals/files/ordered-unique/tests/test_unique.py",
+        "evals/files/ordered-unique/unique.py"
+      ],
+      "expectations": [
+        "順序保持・要素保持・重複除去・入力不変を公開仕様に対応する生成テストで検証する",
+        "空入力や重複だけでなく、辞書順と初出順が異なる入力で現実装の不具合を検出する",
+        "実際のHypothesis出力の反例を保存し、再現用テストやライブラリの再現情報で再実行して同じ失敗を確認する",
+        "製品コード・既存テストを変更せず、入力をソートする等の前処理や期待値緩和で失敗を隠さない",
+        "新規テストの失敗を未解決の製品不具合として報告し、全テスト成功と報告しない"
+      ]
+    }
+  ]
+}
