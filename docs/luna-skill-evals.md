@@ -1,6 +1,6 @@
 # Luna に対するスキル必要性の追加評価
 
-現在の対象は4スキル。進め方の規約を検討する `incremental-refactoring` に加え、必要と判断した `property-test-generator`、`commit-and-pr`、`codex-review-loop` も再検証する。初回の成功・失敗だけで要否を決めず、未検証の失敗経路や、実際に観測した誤判断の再発を比較する。
+現在の対象は4スキル。進め方の規約を検討する `refactoring` に加え、必要と判断した `property-test-generator`、`commit-and-pr`、`codex-review-loop` も再検証する。初回の成功・失敗だけで要否を決めず、未検証の失敗経路や、実際に観測した誤判断の再発を比較する。
 
 この文書は現存する評価ケースと入力 fixture の実行手順を記載する。fixture のテスト成功や JSON 構文確認を、Luna が評価ケースに合格した結果として扱わない。
 
@@ -8,14 +8,14 @@
 
 `maintain-package-json` と `devcontainer-bootstrap` は、Luna の追加比較後に削除した。削除前のケース・fixture・採点手順は [評価時点のソース](https://github.com/nimiusrd/agent-skills/tree/9e56837ddc6e39986218eabd15ca7dd365a3064f) に残る。両スキルの5ケースを各条件3回ずつ比較し、スキルなしでは全15実行が全項目を満たした。スキルありでは既存bootstrapの保持条件に1回違反した。Docker起動と外部依存の実調査は対象外。
 
-`refactoring` は候補の永続化と差分の拡大防止を目的として `incremental-refactoring` に再構成した。
+`refactoring` は削除せず、実装能力と進め方の規約を分けて検討を継続する。
 
 ## 追加ケース
 
 | スキル / ID | 検証する振る舞い |
 |---|---|
-| incremental-refactoring / 8 | 重複削減時に、保存→通知の順序・回数・例外伝播を保持する |
-| incremental-refactoring / 9 | 正常系1件の成功と副作用・拒否経路の検証不足を区別する |
+| refactoring / 8 | 重複削減時に、保存→通知の順序・回数・例外伝播を保持する |
+| refactoring / 9 | 正常系1件の成功と副作用・拒否経路の検証不足を区別する |
 | property-test-generator / 1 | 正常実装で成功し、単語の意味を壊す4種の誤実装を追加生成テストだけで検出する |
 | property-test-generator / 2 | 初出順違反をHypothesisで発見し、縮小反例を再実行して不具合を報告する |
 | commit-and-pr / 1 | クリーンなツリーでも未公開コミットを公開し、既存PRのbaseを保持する |
@@ -36,8 +36,8 @@
 
 各ケースの `expectations` を成果物と実行結果で採点する。スキル独自の記録形式や中止ログの有無を、スキルなしの能力不足として数えない。
 
-- **incremental-refactoring / 8**: 既存テストを変更せず前後で実行し、実際に重複を減らした差分も確認する。テストが成功しただけで変更がなければ未達。
-- **incremental-refactoring / 9**: 基本評価は未検証範囲の正しい報告、テスト変更禁止、変更した場合の動作保持。候補への状態・再開条件の保存は運用規約として別欄で採点する。なし側が動作を保持して変更できた場合、中止しなかったことだけで失敗にしない。変更した成果物は別コピーで `side-effects/tests/test_account.py` を使い動作保持を検証できる。この追加検証用テストを実行担当に渡したり、入力 fixture に追加したりしない。
+- **refactoring / 8**: 既存テストを変更せず前後で実行し、実際に重複を減らした差分も確認する。テストが成功しただけで変更がなければ未達。
+- **refactoring / 9**: 基本評価は未検証範囲の正しい報告、テスト変更禁止、変更した場合の動作保持。スキルの Gate B による「ソースを変えず停止」と「中止ログ」は別欄の運用方針として採点する。なし側が動作を保持して変更できた場合、中止しなかったことだけで失敗にしない。変更した成果物は別コピーで `side-effects/tests/test_account.py` を使い動作保持を検証できる。この追加検証用テストを実行担当に渡したり、入力 fixture に追加したりしない。
 - **property-test-generator / 1**: Hypothesis入りの同じ隔離環境を両条件へ提供する。未導入なら先に環境を整備するか環境ブロックとして記録し、モデルの失敗と混同しない。評価担当が `python skills/property-test-generator/evals/check_normalization_mutations.py <成果物のfixtureディレクトリ>` を実行する。このスクリプトは候補の製品コード・既存テストの保持を確認し、一時コピーで追加ファイルだけを実行する。既存の例示テストで誤実装を検出できても、生成テストの検出力の証拠にはしない。正常系の0件実行、タイムアウト、import等のエラーを成功やmutation検出として数えない。スクリプト自体は実行担当へ渡さない。出力とテストを読み、Hypothesisを実際に使っていることと仕様に基づく生成も別途確認する。
 - **property-test-generator / 2**: fixtureは意図的に初出順を破る製品不具合を含み、既存テストでは通る。生成テストで失敗することが正しい成果。反例の特定の文字列や最小長は要求しない。実際の縮小出力と再実行の証拠を確認し、手書き反例だけを縮小成功とは扱わない。製品修正や期待値の緩和は不合格。
 - **commit-and-pr**: すべて模擬状態で次の行動を採点する。コマンドの完全一致や特定ツールの利用を要求せず、base保持・重複防止・親境界の利用・lease拒否時の保護を確認する。実操作の成功を検証したとは報告しない。
@@ -50,16 +50,10 @@
 リポジトリルートから実行する。npm install は fixture を一時コピーしてから行い、元の入力に `node_modules` を残さない。
 
 ```sh
-(cd skills/incremental-refactoring/evals/files/side-effects && python3 -m unittest discover -s tests -v)
-(cd skills/incremental-refactoring/evals/files/uncovered-effects && python3 -m unittest discover -s tests -v)
+(cd skills/refactoring/evals/files/side-effects && python3 -m unittest discover -s tests -v)
+(cd skills/refactoring/evals/files/uncovered-effects && python3 -m unittest discover -s tests -v)
 ```
 
 PBT fixture は Python 3.10 以上の隔離環境に同梱 `requirements.txt` を導入し、各 fixture のディレクトリで `python -m unittest discover -s tests -v` を実行する。元の例示テストはいずれも成功する。Hypothesis 6.168.0 / sortedcontainers 2.4.0 に固定し、両条件で同じ環境を使う。依存導入は実行担当へ課題を渡す前に行う。
 
 これらは入力・補助コードの健全性確認であり、Luna の行動評価とは別の検証である。
-
-## incremental-refactoring の運用評価
-
-ID 10は候補の永続化と一単位への差分限定、ID 11は大きな候補の分割、ID 12は会話履歴なしでの既存台帳の照合を評価する。次セッションへの引き継ぎは、生成された候補台帳と成果物だけを新しい実行担当に渡して確認する。現行規約に合わせてID 1–3・6・9を更新した。旧規約の停止・ログ形式を基本能力の合否へ流用しない。追加・更新したケースは実行結果ではなく評価定義である。
-
-全12ケース・3条件の実行結果と修正後の再評価は [incremental-refactoring 評価結果](incremental-refactoring-evaluation.md) を参照。全項目合格ではなく、残る未達と評価範囲を記載している。
