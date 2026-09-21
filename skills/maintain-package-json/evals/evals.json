@@ -93,7 +93,7 @@
       "expectations": [
         "ci.ymlのbuild:copy利用とprebuild/postbuildの暗黙実行を確認する",
         "npm testが成功し、両入口の成功時のpre→build→postが各1回である",
-        "pre失敗時はbuild/post、build失敗時はpostを実行せず非ゼロ終了する",
+        "pre失敗時はbuild/post、build失敗時はpostを実行せず非ゼロ終了する。post失敗時も両入口が非ゼロ終了する",
         "空白・セミコロンを含む引数がbuildにそのまま届く",
         "テストを弱めず、CIが使うbuild:copyとbuildの入口を保持し、変更不要なら根拠を示す"
       ]

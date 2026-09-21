@@ -6,7 +6,7 @@ const {spawnSync} = require('node:child_process');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'fixture-hooks-'));
 try {
   for (const command of ['build', 'build:copy']) {
-    for (const failure of ['', 'pre', 'build']) {
+    for (const failure of ['', 'pre', 'build', 'post']) {
       const log = path.join(tmp, 'events.jsonl');
       fs.writeFileSync(log, '');
       const result = spawnSync('npm', ['run', command, '--', 'a b', 'x;y'], {
