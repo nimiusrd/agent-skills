@@ -1,8 +1,0 @@
-{
-  "name": "fixture-engine",
-  "version": "1.0.1",
-  "main": "index.cjs",
-  "engines": {
-    "node": ">=20"
-  }
-}
