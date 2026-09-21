@@ -46,7 +46,7 @@ gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 | [codex-review-loop](skills/codex-review-loop/SKILL.md) | PR の Codex 再レビュー依頼、指摘対応、マージ可能な状態の確認 | 「Codex レビューを回して」 |
 | [commit-and-pr](skills/commit-and-pr/SKILL.md) | 変更内容の確認、コミット、プッシュ、Pull Request 作成 | 「変更をコミットして PR を作って」 |
 | [property-test-generator](skills/property-test-generator/SKILL.md) | fast-check、Hypothesis、proptest を使ったプロパティベーステストの設計・生成 | 「変更した関数にプロパティテストを追加して」 |
-| [refactoring](skills/refactoring/SKILL.md) | 外部仕様を維持したまま内部構造を改善 | 「このコードを振る舞いを変えずにリファクタリングして」 |
+| [incremental-refactoring](skills/incremental-refactoring/SKILL.md) | 候補を永続化し、小さな単位で段階的に整理 | 「改善候補を残して、一つずつ進めて」 |
 
 各スキルの詳しい動作、制約、対応ツールは、それぞれの `SKILL.md` を参照してください。
 
