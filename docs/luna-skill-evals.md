@@ -1,6 +1,6 @@
 # Luna に対するスキル必要性の追加評価
 
-対象は、初回比較で不要候補となった `refactoring`、`maintain-package-json`、`devcontainer-bootstrap`。初回の成功だけで削除を判断せず、未検証だった副作用・失敗経路・互換性・既存資産保持を比較する。
+対象は `test-generator` を除く6スキル。初回比較で不要候補だった3件に加え、必要と判断した `property-test-generator`、`commit-and-pr`、`codex-review-loop` も再検証する。初回の成功・失敗だけで要否を決めず、未検証の失敗経路や、実際に観測した誤判断の再発を比較する。
 
 この変更は評価ケースと入力 fixture の追加。fixture のテスト成功や JSON 構文確認を、Luna が評価ケースに合格した結果として扱わない。
 
@@ -15,6 +15,13 @@
 | devcontainer-bootstrap / 1 | JSONC のコメントと既存設定を保持して指定 feature だけを追加する |
 | devcontainer-bootstrap / 2 | 共通 bootstrap と同名のチーム独自スクリプトを上書きしない |
 | devcontainer-bootstrap / 3 | プロジェクトの Python 制約から固定タグを選び、生成設定間で整合させる |
+| property-test-generator / 1 | 正常実装で成功し、単語の意味を壊す4種の誤実装を追加生成テストだけで検出する |
+| property-test-generator / 2 | 初出順違反をHypothesisで発見し、縮小反例を再実行して不具合を報告する |
+| commit-and-pr / 1 | クリーンなツリーでも未公開コミットを公開し、既存PRのbaseを保持する |
+| commit-and-pr / 2 | 作成応答が不明でも同じPRを再利用し、fork所有者の異なる同名ブランチを区別する |
+| commit-and-pr / 3 | squash済みの親の境界で子だけを再配置し、lease拒否後の他者更新を守る |
+| codex-review-loop / 8 | 現HEADへの依頼がある状態で明示された待機期限に達したら、再依頼せず終了する |
+| codex-review-loop / 9 | 投稿時刻だけでは最新HEADとレビューの対応を確定しない |
 
 ## 比較条件
 
@@ -35,6 +42,10 @@
 - **devcontainer-bootstrap / 1**: 元のコメント、値、配列を保持した差分であることを確認する。`json.loads` で JSONC を読めないことを fixture 不良とみなさない。
 - **devcontainer-bootstrap / 2**: 競合で無変更終了した場合も、別名で安全に共存させた場合も成果で採点する。スクリプト固有の停止方法だけを必須にしない。
 - **devcontainer-bootstrap / 3**: image または使用する Dockerfile の FROM を確認し、使用しない Dockerfile も生成したなら矛盾がないことを確認する。
+- **property-test-generator / 1**: Hypothesis入りの同じ隔離環境を両条件へ提供する。未導入なら先に環境を整備するか環境ブロックとして記録し、モデルの失敗と混同しない。評価担当が `python skills/property-test-generator/evals/check_normalization_mutations.py <成果物のfixtureディレクトリ>` を実行する。このスクリプトは候補の製品コード・既存テストの保持を確認し、一時コピーで追加ファイルだけを実行する。既存の例示テストで誤実装を検出できても、生成テストの検出力の証拠にはしない。正常系の0件実行、タイムアウト、import等のエラーを成功やmutation検出として数えない。スクリプト自体は実行担当へ渡さない。出力とテストを読み、Hypothesisを実際に使っていることと仕様に基づく生成も別途確認する。
+- **property-test-generator / 2**: fixtureは意図的に初出順を破る製品不具合を含み、既存テストでは通る。生成テストで失敗することが正しい成果。反例の特定の文字列や最小長は要求しない。実際の縮小出力と再実行の証拠を確認し、手書き反例だけを縮小成功とは扱わない。製品修正や期待値の緩和は不合格。
+- **commit-and-pr**: すべて模擬状態で次の行動を採点する。コマンドの完全一致や特定ツールの利用を要求せず、base保持・重複防止・親境界の利用・lease拒否時の保護を確認する。実操作の成功を検証したとは報告しない。
+- **codex-review-loop / 8–9**: 明示された期限を使い、スキル独自の30分既定値を知らないことでは不合格にしない。ケース8は初回に曖昧だった「現HEADの依頼済み」を明記した回帰ケース。ケース9は正規投稿者でもHEAD対応が不明な条件を検証する。
 
 両条件で同じ成果を得られるケース、スキルありだけ成功するケース、両方失敗するケースを分ける。単発の成功や、独自ルールへの準拠だけでスキル全体の要否を決めない。時間・トークンは取得できた実測値だけを併記する。
 
@@ -48,5 +59,7 @@
 (cd skills/maintain-package-json/evals/files/lifecycle-scripts && npm test)
 python3 -m unittest discover -s skills/devcontainer-bootstrap/tests -v
 ```
+
+PBT fixture は Python 3.10 以上の隔離環境に同梱 `requirements.txt` を導入し、各 fixture のディレクトリで `python -m unittest discover -s tests -v` を実行する。元の例示テストはいずれも成功する。Hypothesis 6.168.0 / sortedcontainers 2.4.0 に固定し、両条件で同じ環境を使う。依存導入は実行担当へ課題を渡す前に行う。
 
 これらは入力・補助コードの健全性確認であり、Luna の行動評価とは別の検証である。

@@ -1,0 +1,42 @@
+{
+  "skill_name": "commit-and-pr",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "実操作なしの模擬課題です。コミットしてPRを出してください、という依頼に対する照会・公開の順序を示してください。作業ツリーはクリーン、feature/aには未公開コミット2件があります。公開先はacme/app、既定ブランチはmain。headのリポジトリはacme/app、所有者acme、ブランチfeature/a。同headの唯一のopen PR #42はbase release/2で、今回と同じ目的です。テスト成功済みです。",
+      "expected_output": "未公開コミットをpushし、既存PRのbase release/2を保持して更新する。",
+      "files": [],
+      "expectations": [
+        "作業ツリーがクリーンという理由だけで終了せず、未公開コミットとbaseとの差分を確認する",
+        "repo・head・stateで既存PRを照会し、初回からmainでbaseを絞り込まない",
+        "空コミットや重複PRを作らず、push後にPR #42のタイトル・本文を全差分に合わせて更新する",
+        "base release/2を保持し、既定mainへの無断変更を提案しない"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "実操作なしの模擬課題です。PR作成の続きを行ってください。公開先acme/app、headはfork alice/app:feature/b、baseはrelease/2、pushは完了しています。前回のPR作成APIは応答受信前に切断し、作成の成否が不明です。再照会するとopen PR #71のheadはalice/app:feature/bでbase release/2、open PR #72のheadはbob/app:feature/bでbase release/2でした。今回の差分・検証情報を反映して結果を報告するまでの行動を示してください。",
+      "expected_output": "同名ブランチを所有者・リポジトリで区別し、作成済み#71を更新して再利用する。",
+      "files": [],
+      "expectations": [
+        "作成を再送する前に既存PRを再照会し、応答切断を作成失敗と断定しない",
+        "headのリポジトリ・所有者・ブランチとbaseが一致する#71を選ぶ",
+        "別所有者の#72を変更せず、新しいPRを重複作成しない",
+        "push済みでも必要な本文更新と状態確認を行い、未実施操作を実施済みと報告しない"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "実操作なしの模擬課題です。手動管理のstackで親PRがsquash mergeされたので、子PRを追従させてください。親の旧先端Pまでの内容はmainのコミットSに含まれていますがP自体はmainの祖先ではありません。子ブランチchildはP-C1-C2で、C1/C2だけが子固有です。公開先acme/app、子PR #80のbaseはparentです。作業ツリーはクリーンで、開始時の子remote headはC2。追従に必要なrebaseとforce-with-leaseは許可済みです。再配置・検証後、C2を期待値とするleaseが拒否され、再取得するとremoteは別担当の追加C3へ進んでいました。これまでに行うべき処理と拒否後の次の行動を示してください。",
+      "expected_output": "旧親の境界で子固有コミットのみを移し、他者の更新を上書きせず停止・再確認する。",
+      "files": [],
+      "expectations": [
+        "mainへのbase変更だけで完了せず、旧境界Pを使いC1/C2だけをS上へ移す",
+        "親変更の重複や子変更の欠落がないことを差分と必要な検証で確認する",
+        "履歴更新のpushは確認したremote head C2を期待値にした明示的なleaseを使う",
+        "lease拒否後にC3を確認し、期待値だけをC3に更新した再pushや通常forceで上書きしない",
+        "未公開の追従結果とリモートの状態を区別して報告し、子PRのmainへの付け替えも公開内容と整合させる"
+      ]
+    }
+  ]
+}
