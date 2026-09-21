@@ -2,7 +2,7 @@
 
 AI コーディングエージェントの作業を再利用可能な手順としてまとめた、Agent Skills のコレクションです。このリポジトリは [Agent Plugins 1.0.0](https://agent-plugins.org/specification) に準拠したプラグインでもあり、対応クライアントからまとめてインストールできます。
 
-パッケージ整理、テスト生成、リファクタリング、Dev Container の導入、Pull Request の作成・再レビューまで、日常的な開発作業に使えるスキルを収録しています。
+プロパティベーステストの生成、リファクタリング、Pull Request の作成・再レビューなど、日常的な開発作業に使えるスキルを収録しています。
 
 ## クイックスタート
 
@@ -43,10 +43,8 @@ gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 
 | スキル | 用途 | 依頼例 |
 |---|---|---|
-| [maintain-package-json](skills/maintain-package-json/SKILL.md) | `package.json` のスクリプト整理、未使用依存の削除、依存の更新・メンテナンス状況の確認 | 「依存を更新して、保守状況も確認して」 |
 | [codex-review-loop](skills/codex-review-loop/SKILL.md) | PR の Codex 再レビュー依頼、指摘対応、マージ可能な状態の確認 | 「Codex レビューを回して」 |
 | [commit-and-pr](skills/commit-and-pr/SKILL.md) | 変更内容の確認、コミット、プッシュ、Pull Request 作成 | 「変更をコミットして PR を作って」 |
-| [devcontainer-bootstrap](skills/devcontainer-bootstrap/SKILL.md) | Node.js、Python、Rust 向け Dev Container の導入・安全な更新 | 「このリポジトリに Dev Container を導入して」 |
 | [property-test-generator](skills/property-test-generator/SKILL.md) | fast-check、Hypothesis、proptest を使ったプロパティベーステストの設計・生成 | 「変更した関数にプロパティテストを追加して」 |
 | [refactoring](skills/refactoring/SKILL.md) | 外部仕様を維持したまま内部構造を改善 | 「このコードを振る舞いを変えずにリファクタリングして」 |
 

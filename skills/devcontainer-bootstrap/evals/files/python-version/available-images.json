@@ -1,9 +1,0 @@
-{
-  "notice": "この評価で提供された確認済み固定タグ一覧。外部照会は不要。",
-  "image": "mcr.microsoft.com/devcontainers/python",
-  "tags": [
-    "3.11",
-    "3.12",
-    "3.14"
-  ]
-}
