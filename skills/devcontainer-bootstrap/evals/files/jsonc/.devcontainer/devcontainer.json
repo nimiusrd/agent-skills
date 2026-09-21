@@ -1,0 +1,7 @@
+{
+  // このコメントとチーム設定を保持
+  "image": "example.invalid/team/node:22",
+  "features": {"ghcr.io/devcontainers/features/git:1": {"version": "os-provided"}},
+  "customizations": {"vscode": {"settings": {"editor.formatOnSave": false}}},
+  "postCreateCommand": ["sh", "-c", "echo 'keep me'"],
+}
