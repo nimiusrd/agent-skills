@@ -47,6 +47,7 @@ gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 | [commit-and-pr](skills/commit-and-pr/SKILL.md) | 変更内容の確認、コミット、プッシュ、Pull Request 作成 | 「変更をコミットして PR を作って」 |
 | [property-test-generator](skills/property-test-generator/SKILL.md) | fast-check、Hypothesis、proptest を使ったプロパティベーステストの設計・生成 | 「変更した関数にプロパティテストを追加して」 |
 | [incremental-refactoring](skills/incremental-refactoring/SKILL.md) | 候補を永続化し、小さな単位で段階的に整理 | 「改善候補を残して、一つずつ進めて」 |
+| [oss-repository-setup](skills/oss-repository-setup/SKILL.md) | 公開OSSの新規作成時に、ルールセット・リリース・Issue／PRの初期設定を行う | 「公開リポジトリを作って初期設定して」 |
 
 各スキルの詳しい動作、制約、対応ツールは、それぞれの `SKILL.md` を参照してください。
 
