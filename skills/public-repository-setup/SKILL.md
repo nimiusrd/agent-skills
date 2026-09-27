@@ -19,7 +19,7 @@ description: 公開リポジトリをGitHubに新規作成するとき、小さ�
 
 | タイミング | 設定するもの |
 | --- | --- |
-| リポジトリ作成直後 | マージコミット、headブランチ自動削除、Issues有効、Discussions無効、Immutable Releases |
+| リポジトリ作成直後 | マージコミット、headブランチ自動削除、Issues・Pull requests有効、両方の作成権限をCollaborators only、Discussions無効、Immutable Releases |
 | 初期コミットと既定ブランチの作成後 | PR必須、Force push・削除禁止 |
 
 CIの有無にかかわらず初期設定を完了させ、必須チェックの追加を後続の必須作業にしない。公開用workflowがまだなくてもImmutable Releasesは先に有効にできる。今後作る公開手順を不変Releaseに対応させる。
@@ -53,6 +53,9 @@ PRは必須とし、初期設定ではレビュー承認・レビューコメン
 | マージ方法 | マージコミットを有効にし、squash merge・rebase mergeは無効にする |
 | マージ後のheadブランチ | 自動削除を有効にする |
 | Issues | 有効。不具合・作業・改善候補を記録する |
+| Pull requests | 有効 |
+| Pull request permissions | Collaborators only |
+| Issue permissions | Collaborators only |
 | Issue作成 | すぐ終わる修正では不要。PRだけで完結してよい |
 | PR本文 | 変更の目的と確認結果を簡潔に残す |
 | Issueテンプレート | 初期設定では省略。必要に応じて追加する |
@@ -79,9 +82,9 @@ PRは必須とし、初期設定ではレビュー承認・レビューコメン
 1. **作成先・対象を確定する。** GitHubのhost、所有者、リポジトリ名、公開範囲、作成済みかどうかを依頼・remote・認証情報から確認する。不足する必須情報だけを質問する。作成済みなら公開状態と管理権限を確認する。
 2. **作成または再開する。** 作成も依頼されていれば、同名リポジトリの有無を確認して公開リポジトリを作る。応答不明時に重複作成を試みない。既存リポジトリが見つかった場合は今回の対象か確認し、初期設定の続きに進む。利用可能なGitHub API・コネクタ・`gh`を優先し、未対応項目は公式仕様とUIを確認する。
 3. **初期化の状態を確認する。** 初期コミットと既定ブランチ、設定値、継承ルール、公開手順の有無を取得し、今回適用する差分をまとめる。空のリポジトリでは、初期ファイルの投入をブランチ保護より先に行う。作成から初期設定までの依頼なら、空のままにする指定がない限り、README等の最小限の初期コミットで既定ブランチを作ってよい。手元の既存ソース一式の公開は依頼範囲を確認してから行う。空のままを指定された場合は、ブランチ保護を初期化後の作業として残す。ライセンスはユーザー指定・既存LICENSEに従い、任意のライセンスを選んで追加しない。
-4. **作成直後の設定を適用する。** 上記のタイミング表に沿って、マージ方法、Issues等の機能、リリース設定を適用する。テンプレート等から公開用workflowを引き継いだ場合は、Immutable Releasesとの互換性も確認する。
+4. **作成直後の設定を適用する。** 上記のタイミング表に沿って、マージ方法、Issues・Pull requestsの有効化と作成権限、その他の機能、リリース設定を適用する。Pull request permissionsとIssue permissionsは、それぞれCollaborators onlyに設定する。テンプレート等から公開用workflowを引き継いだ場合は、Immutable Releasesとの互換性も確認する。
 5. **ブランチを保護する。** 既定ブランチの存在を確認し、PR必須・Force push禁止・削除禁止のbranch rulesetを適用する。レビュー承認・コメント解決・必須チェック・最新化要求は追加しない。bot等による既定ブランチへの直接pushがある場合はPR経由にできるか調べ、動作維持のためだけに広いbypassを追加しない。
-6. **再取得して検証する。** APIの書き込み成功だけで完了とせず、設定値と既定ブランチに実際に適用されるルールを確認する。権限不足・API非対応・取得失敗は未確認として扱う。解消できない項目だけを止め、適用済み設定と後続作業を区別して報告する。
+6. **再取得して検証する。** APIの書き込み成功だけで完了とせず、設定値と既定ブランチに実際に適用されるルールを確認する。Issues・Pull requestsの有効化と、両方の作成権限がCollaborators onlyになっていることは別々に確認する。権限不足・API非対応・取得失敗は未確認として扱う。解消できない項目だけを止め、適用済み設定と後続作業を区別して報告する。
 
 初期設定の再実行では、既存rulesetのIDと内容を確認して更新し、同名rulesetを重複作成しない。既に設定済みなら変更不要とする。テンプレートや組織から引き継いだ設定は無関係な部分を保持し、強い保護を標準との差だけで緩和しない。組織ルールや旧branch protectionも重なって効くため、ローカルな設定値だけで有効な保護を判断しない。
 
@@ -103,7 +106,13 @@ gh api --hostname "$github_host" --method POST \
 
 更新には`PUT repos/{owner}/{repo}/rulesets/{ruleset_id}`を使う。作成前の一覧取得・更新前の詳細取得・適用後の再取得を行い、重複や意図しない上書きを防ぐ。
 
-このJSONが扱うのはブランチのrulesetだけ。マージコミットの有効化、headブランチ自動削除、Issues、Discussions、Immutable Releasesは別のリポジトリ設定として適用する。JSONをリポジトリに保存しただけでは設定は反映されない。
+このJSONが扱うのはブランチのrulesetだけ。マージコミットの有効化、headブランチ自動削除、Issues・Pull requestsの有効化と作成権限、Discussions、Immutable Releasesは別のリポジトリ設定として適用する。JSONをリポジトリに保存しただけでは設定は反映されない。
+
+### Issue・PRの作成権限
+
+Settings → General → FeaturesでIssuesとPull requestsを有効にし、各機能の権限ドロップダウンをCollaborators onlyにする。Issue側は「Issue permissions」または「Creation allowed by」と表示される場合がある。保存後にそれぞれの選択値を再確認する。
+
+これらはIssue・PRを作成できる人の設定であり、ブランチのrulesetやマージ前の承認条件とは別。機能を無効化したり、一時的なInteraction limitsで代用したりしない。APIを使う場合は利用中のhostで対応する正式なフィールドを確認し、未対応ならUIで設定する。機能が有効であることだけを根拠に、作成権限も設定済みと判断しない。
 
 ### Immutable Releasesを有効にする前の条件
 
@@ -125,6 +134,8 @@ gh api --hostname "$github_host" --method POST \
 - [Rulesets REST API](https://docs.github.com/en/rest/repos/rules)
 - [RulesetのJSONインポート](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/managing-rulesets-for-a-repository#importing-a-ruleset)
 - [リポジトリ設定REST API](https://docs.github.com/en/rest/repos/repos)
+- [Pull requestsの有効化・作成権限](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/disabling-pull-requests)
+- [Issue作成をCollaborators onlyに制限する設定](https://github.blog/changelog/2026-06-29-restrict-issue-creation-to-collaborators-only/)
 - [Immutable Releases](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases)
 - [リリースの不変性の有効化](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/prevent-release-changes)
 - [GitHub Actionsの不変Releaseと追従タグ](https://docs.github.com/en/actions/how-tos/create-and-publish-actions/using-immutable-releases-and-tags-to-manage-your-actions-releases)
