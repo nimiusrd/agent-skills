@@ -20,7 +20,7 @@ copilot plugin install nimiusrd/agent-skills
 ```
 
 - VS Code: Command Palette で `Chat: Install Plugin From Source` を実行し、`https://github.com/nimiusrd/agent-skills` を指定します。
-- Cursor: Customize からインストールするか、ローカル検証では `~/.cursor/plugins/local/agent-skills` にこのリポジトリを配置します。
+- Cursor: Customize からインストールするか、ローカル検証では `~/.cursor/plugins/local/agent-skills` にこのリポジトリを配置します。チームマーケットプレイスへ取り込む場合は、ルートの [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json) を使います。
 
 ### 特定のスキルだけを入れる
 
@@ -81,7 +81,9 @@ codex plugin add agent-skills@nimiusrd-plugins
 
 インストール後は Codex アプリを再起動し、新しいタスクで収録スキルを使用してください。
 
-マーケットプレイス定義は [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json) にあります。`source.path` はリポジトリのルートを基準に解決され、`./` にある `plugin.json` と `skills/` を参照します。詳細は [OpenAI のプラグイン構成ドキュメント](https://developers.openai.com/plugins/build/plugins#marketplace-metadata) を参照してください。
+Codex のマーケットプレイス定義は [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json) にあります。`source.path` はリポジトリのルートを基準に解決され、`./` にある `plugin.json` と `skills/` を参照します。詳細は [OpenAI のプラグイン構成ドキュメント](https://developers.openai.com/plugins/build/plugins#marketplace-metadata) を参照してください。
+
+Cursor のチームマーケットプレイス定義は [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json) にあります。`plugins[].source` は `./` で、同じルートの `plugin.json` と `skills/` を参照します。
 
 ### 特定のスキルだけをインストールする
 
@@ -106,6 +108,7 @@ cd /path/to/agent-skills
 gh skill publish --dry-run
 python3 -m pip install --quiet -r requirements-plugin-validate.txt
 python3 -m check_jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
+python3 -m check_jsonschema --schemafile https://raw.githubusercontent.com/cursor/plugins/main/schemas/marketplace.schema.json .cursor-plugin/marketplace.json
 ```
 
 ### 2. 作成中のスキルを対象プロジェクトへ入れる
@@ -166,6 +169,7 @@ gh skill preview nimiusrd/agent-skills commit-and-pr
 gh skill publish --dry-run
 python3 -m pip install --quiet -r requirements-plugin-validate.txt
 python3 -m check_jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
+python3 -m check_jsonschema --schemafile https://raw.githubusercontent.com/cursor/plugins/main/schemas/marketplace.schema.json .cursor-plugin/marketplace.json
 ```
 
 この検証は、`main` ブランチへの push と Pull Request でも GitHub Actions により実行されます。

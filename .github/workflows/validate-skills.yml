@@ -25,6 +25,7 @@ jobs:
         run: |
           python3 -m pip install --quiet -r requirements-plugin-validate.txt
           python3 -m check_jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
+          python3 -m check_jsonschema --schemafile https://raw.githubusercontent.com/cursor/plugins/main/schemas/marketplace.schema.json .cursor-plugin/marketplace.json
 
       - name: Check GitHub CLI skill support
         run: |
