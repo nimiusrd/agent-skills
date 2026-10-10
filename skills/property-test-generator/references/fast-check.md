@@ -22,7 +22,8 @@ it("プロパティ名", () => {
 ### プリミティブ
 - `fc.integer({ min, max })` — 整数
 - `fc.nat()` — 自然数（0以上）
-- `fc.float({ noDefaultInfinity: true, noNaN: true, min, max })` — 浮動小数点
+- `fc.double({ noDefaultInfinity: true, noNaN: true, min, max })` — 浮動小数点（JS の `number`）
+- `fc.float(...)` — 32-bit 浮動小数点。`min` / `max` は `Math.fround` で表せる値でないとエラーになる
 - `fc.boolean()` — boolean
 - `fc.string({ minLength, maxLength })` — 文字列
 - `fc.string({ unit: 'grapheme', maxLength: 100 })` — Unicode書記素の文字列（長さはunit数）

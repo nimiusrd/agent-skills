@@ -32,6 +32,70 @@ def run_tests(project, pattern):
         return {"exit_code": None, "tests_run": 0, "output": "timeout after 60 seconds"}
 
 
+def leaf_exception_names(leaf):
+    # 各トレースバックの終端例外だけを取る。メッセージの続き（改行後の
+    # "Details: ..." など）は例外型に数えない。
+    region = leaf.split("Failing test case:", 1)[0]
+    names = []
+    for traceback in re.split(r"(?m)^[ \t]*\| Traceback \(most recent call last\):", region)[1:]:
+        match = re.search(r"(?m)^[ \t]*\| ([A-Za-z_][\w.]*)(?::|$)", traceback)
+        if match is None:
+            return []
+        names.append(match.group(1).rsplit(".", 1)[-1])
+    return names
+
+
+def is_hypothesis_assertion_group(block):
+    header = re.search(r"ExceptionGroup: Hypothesis found (\d+) distinct failures", block)
+    if header is None or re.search(r"\band \d+ more exception", block):
+        return False
+    close = block.rfind("+------------------------------------")
+    if close == -1:
+        return False
+    trailing = block[close:]
+    if re.search(
+        r"(?m)^(?:During handling of the above exception|The above exception was the direct cause|Traceback \(most recent call last\):)",
+        trailing,
+    ):
+        return False
+    leaves = re.split(r"(?m)^[ \t]*\+[+-]*-+[ \t]+\d+[ \t]+-+[ \t]*$", block)[1:]
+    leaves = [leaf for leaf in leaves if leaf.strip()]
+    if len(leaves) != int(header.group(1)):
+        return False
+    for leaf in leaves:
+        names = leaf_exception_names(leaf)
+        if names != ["AssertionError"] * len(names) or not names:
+            return False
+    return True
+
+
+def summary_counts(summary):
+    counts = {}
+    for part in summary.split(","):
+        match = re.fullmatch(r"\s*(.+?)\s*=\s*(\d+)\s*", part)
+        if match is None:
+            return None
+        counts[match.group(1)] = int(match.group(2))
+    return counts
+
+
+def detects_mutation(output):
+    # Hypothesis が複数の失敗をまとめると unittest は errors として数えるため、
+    # 中身がすべて AssertionError の場合に限り検出とみなす。
+    summary = re.search(r"^FAILED \(([^)]*)\)$", output, flags=re.M)
+    if summary is None:
+        return False
+    counts = summary_counts(summary[1])
+    if counts is None or counts.get("unexpected successes", 0):
+        return False
+    failures, errors = counts.get("failures", 0), counts.get("errors", 0)
+    blocks = re.split(r"^=+\n(?=(?:ERROR|FAIL): )", output, flags=re.M)
+    error_blocks = [block for block in blocks if block.startswith("ERROR: ")]
+    if len(error_blocks) != errors or not all(map(is_hypothesis_assertion_group, error_blocks)):
+        return False
+    return failures + errors > 0
+
+
 def check(project):
     original = Path(__file__).parent / "files" / "normalization"
     for name in ("normalizer.py", "tests/test_normalizer.py"):
@@ -49,7 +113,7 @@ def check(project):
             result = run_tests(target, "test_properties_normalizer.py")
             result["passed"] = result["tests_run"] > 0 and (
                 result["exit_code"] == 0 if body is None else
-                result["exit_code"] == 1 and re.search(r"FAILED \(failures=[1-9]\d*\)", result["output"]) is not None
+                result["exit_code"] == 1 and detects_mutation(result["output"])
             )
             results[name] = result
     return results
