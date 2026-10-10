@@ -144,7 +144,7 @@ gh skill preview nimiusrd/agent-skills commit-and-pr
 
 各スキルは `skills/<skill-name>/SKILL.md` を起点に構成されています。必要に応じて、スクリプト、テンプレート、リファレンス、評価ケースを同じディレクトリ内へ配置します。プラグイン全体のメタデータはルートの `plugin.json` にあります。
 
-変更後は、[スキルとプラグインの仕様を検証する](#1-スキルとプラグインの仕様を検証する)の手順で、Agent Skills 仕様と Agent Plugins マニフェストへの適合性を検証してください。スキルの振る舞いを変えた場合は、各スキルの `evals/README.md` に従って評価ケースで確認します。
+変更後は、[スキルとプラグインの仕様を検証する](#1-スキルとプラグインの仕様を検証する)の手順で、Agent Skills 仕様と Agent Plugins マニフェストへの適合性を検証してください。評価ケース（`evals/`）があるスキルの振る舞いを変えた場合は、その `evals/README.md` に従って確認します。
 
 仕様への適合性の検証は、`main` ブランチへの push と Pull Request でも GitHub Actions により実行されます。
 
