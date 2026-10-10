@@ -32,12 +32,26 @@ def run_tests(project, pattern):
         return {"exit_code": None, "tests_run": 0, "output": "timeout after 60 seconds"}
 
 
+def leaf_exception_names(leaf):
+    # Hypothesis は例外行の後に Failing test case などの補足を付ける。
+    # 補足より前で、トレースバックの例外行（| の直後が型名）だけを集める。
+    region = leaf.split("Failing test case:", 1)[0]
+    names = re.findall(r"(?m)^[ \t]*\| ([A-Za-z_][\w.]*)(?::|$)", region)
+    return [name.rsplit(".", 1)[-1] for name in names]
+
+
 def is_hypothesis_assertion_group(block):
     if not re.search(r"ExceptionGroup: Hypothesis found \d+ distinct failures", block):
         return False
-    names = re.findall(r"^\s*\|\s+(?:\w+\.)*(\w+(?:Error|Exception|Group|Exit|Interrupt))(?::|$)", block, flags=re.M)
-    names = [name for name in names if name not in ("ExceptionGroup", "BaseExceptionGroup")]
-    return bool(names) and all(name == "AssertionError" for name in names)
+    leaves = re.split(r"(?m)^[ \t]*\+[+-]*-+[ \t]+\d+[ \t]+-+[ \t]*$", block)[1:]
+    leaves = [leaf for leaf in leaves if leaf.strip()]
+    if not leaves:
+        return False
+    for leaf in leaves:
+        names = leaf_exception_names(leaf)
+        if names != ["AssertionError"] * len(names) or not names:
+            return False
+    return True
 
 
 def detects_mutation(output):
