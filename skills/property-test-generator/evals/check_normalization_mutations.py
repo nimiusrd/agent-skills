@@ -32,6 +32,29 @@ def run_tests(project, pattern):
         return {"exit_code": None, "tests_run": 0, "output": "timeout after 60 seconds"}
 
 
+def is_hypothesis_assertion_group(block):
+    if not re.search(r"ExceptionGroup: Hypothesis found \d+ distinct failures", block):
+        return False
+    names = re.findall(r"^\s*\|\s+(?:\w+\.)*(\w+(?:Error|Exception|Group|Exit|Interrupt))(?::|$)", block, flags=re.M)
+    names = [name for name in names if name not in ("ExceptionGroup", "BaseExceptionGroup")]
+    return bool(names) and all(name == "AssertionError" for name in names)
+
+
+def detects_mutation(output):
+    # Hypothesis が複数の失敗をまとめると unittest は errors として数えるため、
+    # 中身がすべて AssertionError の場合に限り検出とみなす。
+    summary = re.search(r"^FAILED \(([^)]*)\)$", output, flags=re.M)
+    if summary is None:
+        return False
+    counts = dict(re.findall(r"(\w+)=(\d+)", summary[1]))
+    failures, errors = int(counts.get("failures", 0)), int(counts.get("errors", 0))
+    blocks = re.split(r"^=+\n(?=(?:ERROR|FAIL): )", output, flags=re.M)
+    error_blocks = [block for block in blocks if block.startswith("ERROR: ")]
+    if len(error_blocks) != errors or not all(map(is_hypothesis_assertion_group, error_blocks)):
+        return False
+    return failures + errors > 0
+
+
 def check(project):
     original = Path(__file__).parent / "files" / "normalization"
     for name in ("normalizer.py", "tests/test_normalizer.py"):
@@ -49,7 +72,7 @@ def check(project):
             result = run_tests(target, "test_properties_normalizer.py")
             result["passed"] = result["tests_run"] > 0 and (
                 result["exit_code"] == 0 if body is None else
-                result["exit_code"] == 1 and re.search(r"FAILED \(failures=[1-9]\d*(?:, errors=\d+)?\)", result["output"]) is not None
+                result["exit_code"] == 1 and detects_mutation(result["output"])
             )
             results[name] = result
     return results
