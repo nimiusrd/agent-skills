@@ -51,26 +51,11 @@ gh skill install nimiusrd/agent-skills commit-and-pr --scope project
 
 各スキルの詳しい動作、制約、対応ツールは、それぞれの `SKILL.md` を参照してください。
 
-## インストール方法
-
-### プラグインとしてまとめてインストールする
+## インストールの補足
 
 Agent Plugin 対応クライアントは、ルートの `plugin.json` を読み、`skills/` 直下の各スキルを発見します。
 
-```bash
-copilot plugin install nimiusrd/agent-skills
-```
-
-VS Code では `Chat: Install Plugin From Source`、Cursor では Customize または `~/.cursor/plugins/local/agent-skills` への配置を使います。
-
-#### Codex
-
-Codex では、マーケットプレイスを登録してからプラグインをインストールします。
-
-```bash
-codex plugin marketplace add nimiusrd/agent-skills
-codex plugin add agent-skills@nimiusrd-plugins
-```
+### Codex
 
 ローカルの変更を試す場合は、GitHub リポジトリの代わりに、このリポジトリのルートディレクトリを指定します。
 
@@ -83,17 +68,13 @@ codex plugin add agent-skills@nimiusrd-plugins
 
 Codex のマーケットプレイス定義は [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json) にあります。`source.path` はリポジトリのルートを基準に解決され、`./` にある `plugin.json` と `skills/` を参照します。詳細は [OpenAI のプラグイン構成ドキュメント](https://developers.openai.com/plugins/build/plugins#marketplace-metadata) を参照してください。
 
+### Cursor
+
 Cursor のチームマーケットプレイス定義は [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json) にあります。`plugins[].source` は `./` で、同じルートの `plugin.json` と `skills/` を参照します。
 
-### 特定のスキルだけをインストールする
+### 個別スキル
 
-リポジトリ名の後にスキル名を指定します。
-
-```bash
-gh skill install nimiusrd/agent-skills commit-and-pr --scope project
-```
-
-ほかのスキルを指定する場合は、`commit-and-pr` を収録スキルの名前に置き換えてください。
+`gh skill install` ではリポジトリ名の後にスキル名を指定します。ほかのスキルを入れる場合は、`commit-and-pr` を収録スキルの名前に置き換えてください。
 
 ## ローカルのスキルをインストールして検証する
 
@@ -163,16 +144,9 @@ gh skill preview nimiusrd/agent-skills commit-and-pr
 
 各スキルは `skills/<skill-name>/SKILL.md` を起点に構成されています。必要に応じて、スクリプト、テンプレート、リファレンス、評価ケースを同じディレクトリ内へ配置します。プラグイン全体のメタデータはルートの `plugin.json` にあります。
 
-変更後は、Agent Skills 仕様と Agent Plugins マニフェストへの適合性を検証してください。
+変更後は、[スキルとプラグインの仕様を検証する](#1-スキルとプラグインの仕様を検証する)の手順で、Agent Skills 仕様と Agent Plugins マニフェストへの適合性を検証してください。スキルの振る舞いを変えた場合は、各スキルの `evals/README.md` に従って評価ケースで確認します。
 
-```bash
-gh skill publish --dry-run
-python3 -m pip install --quiet -r requirements-plugin-validate.txt
-python3 -m check_jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
-python3 -m check_jsonschema --schemafile https://raw.githubusercontent.com/cursor/plugins/main/schemas/marketplace.schema.json .cursor-plugin/marketplace.json
-```
-
-この検証は、`main` ブランチへの push と Pull Request でも GitHub Actions により実行されます。
+仕様への適合性の検証は、`main` ブランチへの push と Pull Request でも GitHub Actions により実行されます。
 
 ## 公開
 
