@@ -44,14 +44,14 @@ def test_property_name(val):
 - `.flatmap(fn)` — 依存値生成
 
 ### エッジケースの生成
-生成器は境界寄りの値も選ぶが、毎回必ず選ばれる保証はない。確実に実行すべき境界は `@example` で追加する。
+生成器は境界寄りの値も選ぶが、毎回必ず選ばれる保証はない。確実に実行すべき境界は、生成戦略の範囲内の値を `@example` で追加する。
 
 ```python
 from hypothesis import example
 
 @given(n=st.integers(min_value=1, max_value=1000))
-@example(n=0)
-@example(n=2**63)
+@example(n=1)
+@example(n=1000)
 def test_handles_bounds(n):
     ...
 ```
