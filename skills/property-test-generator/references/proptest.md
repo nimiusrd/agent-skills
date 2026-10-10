@@ -4,6 +4,8 @@ Rust 向け。`cargo test` で実行。既存の Cargo.toml と Cargo.lock の�
 
 ## セットアップ
 
+未導入の場合だけ追加する。
+
 ```toml
 # Cargo.toml
 [dev-dependencies]
@@ -30,7 +32,6 @@ proptest! {
 - `any::<i32>()` — 任意の整数（型推論）
 - `0..100i32` — 範囲（Range は自動で Strategy）
 - `Just(v)` — 固定値
-- `prop_oneof![st1, st2, ...]` — いずれか1つ
 - `"[a-z]{1,10}"` — 正規表現から文字列生成
 - `any::<bool>()` — boolean
 - `any::<f64>().prop_filter("finite", |v| v.is_finite())` — フィルタ付き

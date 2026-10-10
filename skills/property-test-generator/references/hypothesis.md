@@ -5,7 +5,7 @@ Python 向け。pytest と組み合わせて使用。既存の導入版・設定
 ## 基本構造
 
 ```python
-from hypothesis import given, settings, assume, reproduce_failure
+from hypothesis import given
 from hypothesis import strategies as st
 
 @given(val=st.integers(min_value=0, max_value=100))
@@ -44,12 +44,16 @@ def test_property_name(val):
 - `.flatmap(fn)` — 依存値生成
 
 ### エッジケースの生成
+生成器は境界寄りの値も選ぶが、毎回必ず選ばれる保証はない。確実に実行すべき境界は `@example` で追加する。
+
 ```python
-st.one_of(
-    st.just(0),
-    st.just(float("inf")),
-    st.integers(min_value=1, max_value=1000),
-)
+from hypothesis import example
+
+@given(n=st.integers(min_value=1, max_value=1000))
+@example(n=0)
+@example(n=2**63)
+def test_handles_bounds(n):
+    ...
 ```
 
 ## プロパティパターン
