@@ -33,11 +33,16 @@ def run_tests(project, pattern):
 
 
 def leaf_exception_names(leaf):
-    # Hypothesis は例外行の後に Failing test case などの補足を付ける。
-    # 補足より前で、トレースバックの例外行（| の直後が型名）だけを集める。
+    # 各トレースバックの終端例外だけを取る。メッセージの続き（改行後の
+    # "Details: ..." など）は例外型に数えない。
     region = leaf.split("Failing test case:", 1)[0]
-    names = re.findall(r"(?m)^[ \t]*\| ([A-Za-z_][\w.]*)(?::|$)", region)
-    return [name.rsplit(".", 1)[-1] for name in names]
+    names = []
+    for traceback in re.split(r"(?m)^[ \t]*\| Traceback \(most recent call last\):", region)[1:]:
+        match = re.search(r"(?m)^[ \t]*\| ([A-Za-z_][\w.]*)(?::|$)", traceback)
+        if match is None:
+            return []
+        names.append(match.group(1).rsplit(".", 1)[-1])
+    return names
 
 
 def is_hypothesis_assertion_group(block):
