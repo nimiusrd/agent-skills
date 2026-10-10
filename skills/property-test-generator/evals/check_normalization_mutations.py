@@ -46,11 +46,21 @@ def leaf_exception_names(leaf):
 
 
 def is_hypothesis_assertion_group(block):
-    if not re.search(r"ExceptionGroup: Hypothesis found \d+ distinct failures", block):
+    header = re.search(r"ExceptionGroup: Hypothesis found (\d+) distinct failures", block)
+    if header is None or re.search(r"\band \d+ more exception", block):
+        return False
+    close = block.rfind("+------------------------------------")
+    if close == -1:
+        return False
+    trailing = block[close:]
+    if re.search(
+        r"(?m)^(?:During handling of the above exception|The above exception was the direct cause|Traceback \(most recent call last\):)",
+        trailing,
+    ):
         return False
     leaves = re.split(r"(?m)^[ \t]*\+[+-]*-+[ \t]+\d+[ \t]+-+[ \t]*$", block)[1:]
     leaves = [leaf for leaf in leaves if leaf.strip()]
-    if not leaves:
+    if len(leaves) != int(header.group(1)):
         return False
     for leaf in leaves:
         names = leaf_exception_names(leaf)
@@ -59,14 +69,26 @@ def is_hypothesis_assertion_group(block):
     return True
 
 
+def summary_counts(summary):
+    counts = {}
+    for part in summary.split(","):
+        match = re.fullmatch(r"\s*(.+?)\s*=\s*(\d+)\s*", part)
+        if match is None:
+            return None
+        counts[match.group(1)] = int(match.group(2))
+    return counts
+
+
 def detects_mutation(output):
     # Hypothesis が複数の失敗をまとめると unittest は errors として数えるため、
     # 中身がすべて AssertionError の場合に限り検出とみなす。
     summary = re.search(r"^FAILED \(([^)]*)\)$", output, flags=re.M)
     if summary is None:
         return False
-    counts = dict(re.findall(r"(\w+)=(\d+)", summary[1]))
-    failures, errors = int(counts.get("failures", 0)), int(counts.get("errors", 0))
+    counts = summary_counts(summary[1])
+    if counts is None or counts.get("unexpected successes", 0):
+        return False
+    failures, errors = counts.get("failures", 0), counts.get("errors", 0)
     blocks = re.split(r"^=+\n(?=(?:ERROR|FAIL): )", output, flags=re.M)
     error_blocks = [block for block in blocks if block.startswith("ERROR: ")]
     if len(error_blocks) != errors or not all(map(is_hypothesis_assertion_group, error_blocks)):
