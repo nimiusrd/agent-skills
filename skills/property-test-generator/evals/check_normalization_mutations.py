@@ -49,7 +49,7 @@ def check(project):
             result = run_tests(target, "test_properties_normalizer.py")
             result["passed"] = result["tests_run"] > 0 and (
                 result["exit_code"] == 0 if body is None else
-                result["exit_code"] == 1 and re.search(r"FAILED \(failures=[1-9]\d*\)", result["output"]) is not None
+                result["exit_code"] == 1 and re.search(r"FAILED \(failures=[1-9]\d*(?:, errors=\d+)?\)", result["output"]) is not None
             )
             results[name] = result
     return results
